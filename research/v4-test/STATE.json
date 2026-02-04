@@ -1,0 +1,74 @@
+{
+  "version": "2.0",
+  "slug": "v4-test",
+  "preset": "quick",
+  "contested_flag": false,
+  "min_sources_per_unit": 2,
+  "extraction_depth": "light",
+  "tier_targets": {
+    "academic": 70,
+    "practitioner": 25,
+    "other": 5
+  },
+  "research_units": [
+    "zero-shot-few-shot-prompting",
+    "chain-of-thought-reasoning"
+  ],
+  "deliverable": "REPORT",
+  "phase": "complete",
+  "started_at": "2026-02-04T00:00:00Z",
+  "completed_at": "2026-02-04T00:30:00Z",
+  "key_terms": [
+    "prompt engineering",
+    "few-shot learning",
+    "chain of thought prompting",
+    "in-context learning",
+    "zero-shot prompting",
+    "reasoning LLM"
+  ],
+  "config": {
+    "recency_policy": "fast_moving",
+    "max_age_years": 1.5,
+    "snowball": {
+      "enabled": false,
+      "max_seeds_per_unit": 3,
+      "max_snowball_sources": 5
+    },
+    "grey_literature": false,
+    "structured_extraction": false
+  },
+  "gates": {
+    "depth_gate": {
+      "required_fulltext": 2,
+      "status": "passed",
+      "fulltext_extracted": 4
+    },
+    "safety_gate": {
+      "counterevidence_required": false,
+      "status": "not_required"
+    },
+    "retraction_gate": {
+      "status": "passed",
+      "removed": 0
+    }
+  },
+  "statistics": {
+    "sources_found": 31,
+    "sources_deduplicated": 25,
+    "fulltext_resolved": 25,
+    "abstract_only": 0,
+    "paywalled": 0,
+    "retractions_found": 0,
+    "snowball_added": 0
+  },
+  "summary": {
+    "sources": 25,
+    "sources_extracted": 4,
+    "claims": 9,
+    "high_confidence": 0,
+    "low_confidence": 9,
+    "contested": 0,
+    "fulltext_rate": 1.0,
+    "all_gates_passed": true
+  }
+}

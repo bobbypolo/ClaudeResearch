@@ -1,0 +1,64 @@
+{
+  "timestamp": "2026-02-04T00:00:00Z",
+  "total_before": 31,
+  "total_after": 25,
+  "merges": [
+    {
+      "canonical_key": "doi:10.18653/v1/2024.emnlp-main.64",
+      "kept": {
+        "title": "A Survey on In-context Learning",
+        "source": "practitioner.md (reclassified to ACADEMIC Tier 1)",
+        "reason": "Peer-reviewed EMNLP proceedings - promoted from practitioner"
+      },
+      "dropped": []
+    }
+  ],
+  "reclassifications": [
+    {
+      "title": "A Survey on In-context Learning",
+      "from": "PRACTITIONER",
+      "to": "ACADEMIC",
+      "tier": 1,
+      "reason": "ACL Anthology is peer-reviewed conference proceedings (EMNLP 2024)",
+      "doi": "10.18653/v1/2024.emnlp-main.64"
+    }
+  ],
+  "duplicates_removed": [
+    {
+      "title": "GPT-5 prompting guide",
+      "reason": "Duplicate coverage - OpenAI Cookbook overlaps with platform docs",
+      "kept": "Prompt engineering (OpenAI Platform)"
+    },
+    {
+      "title": "In-Context Learning (ICL) - Learn Prompting",
+      "reason": "Duplicate coverage - foundational ICL covered by academic sources",
+      "dropped_in_favor_of": "Academic ICL papers"
+    },
+    {
+      "title": "Chain of Thought Prompting: Step-by-Step Reasoning",
+      "reason": "Duplicate coverage of AI Prompt Theory with other CoT guides",
+      "dropped_in_favor_of": "Microsoft Learn and Prompting Guide AI"
+    },
+    {
+      "title": "Chain-of-thought Prompting: A Comprehensive Guide for 2025",
+      "reason": "Low authority (ShadeCoder blog) - covered by higher-tier sources",
+      "dropped_in_favor_of": "Academic CoT papers"
+    },
+    {
+      "title": "In Context Learning Guide",
+      "reason": "Duplicate of PromptHub substack content",
+      "dropped_in_favor_of": "PromptHub substack article"
+    },
+    {
+      "title": "Chain of Thought Prompting: Enhancing AI Reasoning",
+      "reason": "Coursera article duplicates DataCamp and Codecademy coverage",
+      "dropped_in_favor_of": "DataCamp tutorial"
+    }
+  ],
+  "notes": [
+    "All arXiv sources retained (preprints, Tier 2)",
+    "EMNLP paper promoted to Tier 1 academic",
+    "Practitioner sources filtered for authority and uniqueness",
+    "6 duplicates/low-authority sources removed"
+  ]
+}
