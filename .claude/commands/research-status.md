@@ -23,6 +23,7 @@ If `research/{slug}/STATE.json` exists, read it to get:
 - Preset configuration
 - Research units
 - Min sources per unit
+- Deliverable type (for v2.0 conditional files)
 
 ### Step 3: Check File Existence
 
@@ -34,12 +35,18 @@ Scan for these files:
 | `STATE.json` | 1 | Workflow state |
 | `discovery/academic.md` | 2 | Academic sources |
 | `discovery/practitioner.md` | 2 | Practitioner sources (optional) |
-| `discovery/counterevidence.md` | 2 | Counterevidence (optional) |
+| `discovery/counterevidence.md` | 2 | Counterevidence (required for >=standard) |
+| `discovery/grey_literature.md` | 2 | Grey literature (BLUEPRINT only) |
+| `discovery/snowball.md` | 2 | Citation snowball expansion |
 | `SOURCES.md` | 3 | Curated source list |
 | `topics/*/findings.md` | 4 | Extracted evidence |
+| `topics/*/findings_structured.json` | 4 | Structured extraction (VERDICT/COMPARISON) |
 | `claims.md` | 5 | Evidence registry |
 | `synthesis/final_deliverable.md` | 6 | Main output |
 | `synthesis/critique.md` | 7 | Quality assessment |
+| `logs/retraction_flags.json` | 3 | Retraction check results |
+| `logs/dedup_log.json` | 3 | Deduplication decisions |
+| `logs/validation.json` | 5 | Pre-synthesis validation |
 
 ### Step 4: Determine Current Phase
 
@@ -66,6 +73,21 @@ If claims.md exists:
 - Count claims by confidence (HIGH, LOW, CONTESTED)
 - Identify any gaps
 
+**v2.0 Statistics:**
+
+If findings files exist, count by access depth:
+- FULLTEXT: Sources with full text extracted
+- ABSTRACT_ONLY: Sources with only abstract available
+- PAYWALLED: Sources behind paywall with no OA version
+
+If `logs/retraction_flags.json` exists:
+- Count retracted sources flagged
+- Count expressions of concern
+
+If `logs/dedup_log.json` exists:
+- Count duplicates removed
+- Count potential duplicates remaining
+
 ### Step 6: Output Status Report
 
 ```
@@ -89,6 +111,7 @@ Status: [NOT STARTED | IN PROGRESS | COMPLETE]
 - Min sources/unit: {min}
 - Extraction depth: {depth}
 - Contested: {yes/no}
+- Deliverable: {VERDICT|REPORT|COMPARISON|BLUEPRINT|BIBLIOGRAPHY}
 
 ### Sources
 | Type | Count | Target |
@@ -96,6 +119,20 @@ Status: [NOT STARTED | IN PROGRESS | COMPLETE]
 | Academic | N | 70% |
 | Practitioner | N | 25% |
 | Other | N | 5% |
+
+### v2.0 Access Depth
+| Access Level | Count | Percentage |
+|--------------|-------|------------|
+| FULLTEXT | N | X% |
+| ABSTRACT_ONLY | N | X% |
+| PAYWALLED | N | X% |
+
+### v2.0 Quality Checks
+| Check | Status |
+|-------|--------|
+| Retracted flagged | N sources |
+| Duplicates removed | N sources |
+| Potential duplicates | N remaining |
 
 ### Claims
 | Confidence | Count |
@@ -109,6 +146,15 @@ Status: [NOT STARTED | IN PROGRESS | COMPLETE]
 |---------------|---------|--------|
 | {unit1} | N | [OK|GAP] |
 
+### v2.0 Conditional Files
+| File | Required For | Status |
+|------|--------------|--------|
+| grey_literature.md | BLUEPRINT | [Present|Missing|N/A] |
+| findings_structured.json | VERDICT/COMPARISON | [Present|Missing|N/A] |
+| snowball.md | >=standard | [Present|Missing|N/A] |
+| retraction_flags.json | All | [Present|Missing] |
+| dedup_log.json | All | [Present|Missing] |
+
 ### Next Steps
 - [Action based on current phase]
 ```
@@ -119,4 +165,28 @@ Status: [NOT STARTED | IN PROGRESS | COMPLETE]
 
 **If in progress:** Run `/research-resume {slug}`
 
+**If pre-synthesis:** Run `/research-validate {slug}` to check quality gates
+
 **If complete:** Review `synthesis/final_deliverable.md` and `synthesis/critique.md`
+
+### Step 8: v2.0 Validation Summary
+
+If `logs/validation.json` exists, display last validation result:
+
+```
+### Last Validation
+- Date: {timestamp}
+- Overall: [PASS|PASS WITH WARNINGS|FAIL]
+- Checks:
+  - FULLTEXT coverage: {X}% ({status})
+  - Tier targets: {status}
+  - Retraction flags: {status}
+  - HIGH claim validity: {status}
+  - Deduplication: {status}
+```
+
+If validation failed, highlight:
+```
+⚠️ Validation FAILED - Address issues before synthesis
+Run `/research-validate {slug}` for details
+```

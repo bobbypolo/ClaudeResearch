@@ -38,6 +38,23 @@ What is the current state of [topic]?
 - "[synonym or variant]"
 - "[related concept]"
 
+## Recency Policy
+<!-- OPTIONAL: Controls how aggressively to prefer recent sources -->
+<!--
+  fast_moving: Prioritize sources from last 2 years. Older sources need strong justification.
+               Use for: AI/ML, cybersecurity, cloud technologies, social media trends.
+               Example: "What are current best practices for LLM fine-tuning?"
+
+  scientific:  Standard 5-year window. Balance recency with citation count.
+               Use for: Established scientific fields, medical research, engineering.
+               Example: "What are effective treatments for condition X?"
+
+  historical:  No recency preference. Foundational works equally weighted.
+               Use for: Philosophy, history, legal analysis, long-term trends.
+               Example: "What are the key theories of organizational behavior?"
+-->
+**Recency**: scientific
+
 ---
 <!-- OPTIONAL: Add preset hint for workflow tuning -->
 <!-- Preset: quick | standard | thorough | decision-support -->

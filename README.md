@@ -4,13 +4,51 @@
 
 Research ADE executes comprehensive, evidence-based research in a single session using MCP tools to access academic databases (OpenAlex, arXiv) and web sources (Exa). Provide a SPEC, get a confidence-graded synthesis with full source traceability.
 
+---
+
+## What's New in v4.0
+
+### Full-Text Access via Unpaywall
+- Automatically retrieves open-access PDFs when available
+- Falls back to abstracts with clear "Abstract only" notation
+- No API key required (free service)
+
+### Enforcement Gates
+- **Depth Gate**: Validates extraction depth meets preset requirements
+- **Safety Gate**: Blocks sources without proper attribution or dates
+- **Retraction Gate**: Checks for retracted papers via Crossref API
+
+### Citation Snowballing
+- Forward snowballing: Finds papers citing key sources
+- Backward snowballing: Examines reference lists
+- Discovers high-impact sources missed by keyword search
+
+### Enhanced Deduplication Pipeline
+- DOI-based exact matching
+- Title similarity (>90% threshold)
+- Author/year cross-validation
+- Prefers peer-reviewed over preprints over web sources
+
+### Structured Data Extraction
+- Standardized JSON output for claims
+- Machine-readable source metadata
+- Cross-reference tracking between claims and sources
+
+### Grey Literature Access
+- Government reports (via gov domain filtering)
+- Technical standards documents
+- Conference proceedings beyond major venues
+
+---
+
 ## Features
 
-- **7-Phase Workflow**: Parse → Discover → Curate → Extract → Compile → Synthesize → Critique
+- **7-Phase Workflow**: Parse -> Discover -> Curate -> Extract -> Compile -> Synthesize -> Critique
 - **MCP-Powered Discovery**: OpenAlex (250M+ papers), arXiv (preprints), Exa (web)
+- **Full-Text Access**: Unpaywall integration for open-access papers
 - **Parallel Agents**: Discovery agents run simultaneously for speed
 - **Auto-Complexity Detection**: Presets adjust based on deliverable type
-- **Simple Confidence**: HIGH (3+ sources) / LOW (1-2 sources) / CONTESTED
+- **Robust Confidence**: HIGH (3+ T1 sources + 2+ full-text) / LOW (1-2 sources) / CONTESTED
 - **Full Traceability**: Every claim links to sources with DOIs and tiers
 - **Resumable**: STATE.json tracks progress; continue from any checkpoint
 
@@ -93,6 +131,8 @@ Primary outputs:
 | `/research {slug} --thorough` | Deep (5 sources/unit, 3 passes + counterevidence) |
 | `/research-status {slug}` | Check progress and statistics |
 | `/research-resume {slug}` | Continue interrupted research |
+| `/research-validate {slug}` | Validate sources and check for retractions |
+| `/cite {DOI or title}` | Quick citation lookup and formatting |
 
 ---
 
@@ -111,7 +151,7 @@ Primary outputs:
 
 ### Phase 1: Parse
 - Reads SPEC.md, validates required sections
-- Auto-detects complexity, sets preset if not specified
+- Auto-detects complexity and recency policy
 - Writes STATE.json with configuration
 - Creates directory structure
 
@@ -120,20 +160,25 @@ Primary outputs:
 - Academic: OpenAlex + arXiv for peer-reviewed/preprints
 - Practitioner: Exa for tutorials, docs, case studies
 - Counterevidence pass (if --thorough or contested topic)
+- **NEW**: Citation snowballing for key sources
 
 ### Phase 3: Curate
-- Merges discovery results, deduplicates by DOI/title
+- Merges discovery results with enhanced deduplication
+- **NEW**: Retraction checking via Crossref
 - Filters by tier targets and relevance
 - Writes SOURCES.md with curated list
 
 ### Phase 4: Extract
 - Reads top N sources per unit (based on preset)
+- **NEW**: Unpaywall integration for full-text access
 - Uses arXiv API for preprints, Firecrawl for web
+- **NEW**: Depth gate validates extraction completeness
 - Writes findings to `topics/{unit}/findings.md`
 
 ### Phase 5: Compile
 - Builds claims registry from extracted evidence
-- Calculates confidence: HIGH (3+ T1) / LOW (1-2) / CONTESTED
+- **NEW**: Enhanced confidence requires 2+ full-text sources for HIGH
+- Calculates confidence: HIGH (3+ T1 + 2+ FULLTEXT) / LOW (1-2) / CONTESTED
 - Writes claims.md
 
 ### Phase 6: Synthesize
@@ -143,6 +188,7 @@ Primary outputs:
 
 ### Phase 7: Critique
 - Self-assesses source quality and coverage
+- **NEW**: Reports full-text vs abstract-only ratio
 - Documents limitations and what could invalidate conclusions
 - Writes `synthesis/critique.md`
 
@@ -156,14 +202,22 @@ research/{slug}/
 ├── STATE.json                  # Workflow state and config
 ├── discovery/
 │   ├── academic.md             # OpenAlex + arXiv results
-│   └── practitioner.md         # Exa results
+│   ├── practitioner.md         # Exa results
+│   ├── counterevidence.md      # Critiques (if run)
+│   └── snowball.md             # Citation snowballing results (NEW)
 ├── SOURCES.md                  # Curated source list
 ├── topics/
-│   └── {unit}/findings.md      # Extracted evidence per unit
+│   └── {unit}/
+│       ├── findings.md         # Extracted evidence per unit
+│       └── findings.json       # Structured extraction (NEW)
 ├── claims.md                   # Evidence registry
+├── claims.json                 # Machine-readable claims (NEW)
+├── validation/
+│   └── retraction_check.md     # Retraction scan results (NEW)
 └── synthesis/
     ├── final_deliverable.md    # PRIMARY OUTPUT
-    └── critique.md             # Quality assessment
+    ├── critique.md             # Quality assessment
+    └── contradictions.md       # If contested
 ```
 
 ---
@@ -184,8 +238,8 @@ research/{slug}/
 
 | Level | Requirement | Display |
 |-------|-------------|---------|
-| **HIGH** | 3+ Tier-1/2 sources agree | Stated with confidence |
-| **LOW** | 1-2 sources only | Flagged as tentative |
+| **HIGH** | 3+ Tier-1 sources agree AND 2+ full-text accessed | Stated with confidence |
+| **LOW** | 1-2 sources only OR abstract-only extraction | Flagged as tentative |
 | **CONTESTED** | Sources disagree | Both positions presented |
 
 ---
@@ -212,7 +266,13 @@ research/{slug}/
 | **arXiv** | Preprints | Free |
 | **Exa** | Web search | Required |
 | **Firecrawl** | Content extraction | Required |
-| **Crossref** | DOI validation | Free |
+| **Crossref** | DOI validation, retraction checking | Free |
+
+### Optional Services
+
+| Service | Purpose | API Key |
+|---------|---------|---------|
+| **Unpaywall** | Full-text PDF access | Free (no key needed) |
 
 ### Configuration
 
@@ -231,6 +291,7 @@ See `docs/RESEARCH_SETUP.md` for:
 | Extraction failing | Firecrawl rate-limited; wait and `/research-resume` |
 | Low Tier-1 percentage | Field may be too new; document as limitation |
 | Research interrupted | Use `/research-resume {slug}` to continue |
+| Retracted paper found | System auto-excludes and logs in validation/ |
 
 ---
 
@@ -250,13 +311,15 @@ See `docs/RESEARCH_SETUP.md` for:
 
 | Aspect | Standard Mode | Research ADE |
 |--------|---------------|--------------|
-| Sources | Web search snippets | OpenAlex, arXiv, Exa |
+| Sources | Web search snippets | OpenAlex, arXiv, Exa, Unpaywall |
+| Full-text access | Rare | Systematic via Unpaywall |
 | Traceability | Weak | DOI, citations, tiers |
 | Confidence | Implicit | Explicit HIGH/LOW/CONTESTED |
+| Retraction checking | None | Automatic via Crossref |
 | Persistence | None | Full file structure |
 | Reproducibility | None | STATE.json + artifacts |
 | Best for | Quick questions | Rigorous research |
 
 ---
 
-**Version 3.0** | Simplified 7-Phase Workflow
+**Version 4.0** | Enhanced with Full-Text Access, Enforcement Gates, and Citation Snowballing
