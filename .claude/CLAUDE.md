@@ -1,10 +1,10 @@
-# Research ADE v2.0 - Project Constitution
+# Research ADE v4.0 - Project Constitution
 
 ## Overview
 
 **Research ADE** is an autonomous research system that produces high-quality, evidence-based research outputs in a single session. The system uses MCP tools to search academic databases, preprint servers, and web resources.
 
-**Version 2.0 Key Features:**
+**Key Features:**
 - 7-phase workflow with parallel execution
 - Full-text access layer with Unpaywall integration
 - Enforcement gates (Depth, Safety, Retraction)
@@ -25,11 +25,11 @@ All outputs are persisted to `research/{slug}/` for reproducibility.
 
 **Rule**: All outputs MUST be written to `research/{slug}/` files. Return only summaries to orchestrator.
 
-**v2.0 File Structure:**
+**File Structure:**
 ```
 research/{slug}/
 ├── SPEC.md                     # Input specification
-├── STATE.json                  # Workflow state and config (v2.0 schema)
+├── STATE.json                  # Workflow state and config
 ├── discovery/
 │   ├── academic.md             # Academic pass results
 │   ├── practitioner.md         # Practitioner pass (if run)
@@ -82,7 +82,7 @@ research/{slug}/
 | **2** | Preprints, patents, tech reports | 25% |
 | **3** | Industry, blogs, documentation | 5% |
 
-**v2.0 Access Depth Tags:**
+**Access Depth Tags:**
 | Tag | Meaning |
 |-----|---------|
 | **FULLTEXT** | Complete document accessed and extracted |
@@ -101,7 +101,7 @@ research/{slug}/
 
 ### Principle 4: Gated Confidence
 
-**Rule**: Three confidence levels with v2.0 enforcement gates.
+**Rule**: Three confidence levels with enforcement gates.
 
 | Level | Requirement |
 |-------|-------------|
@@ -109,7 +109,7 @@ research/{slug}/
 | **LOW** | 1-2 sources OR only ABSTRACT_ONLY/PAYWALLED |
 | **CONTESTED** | Credible sources disagree |
 
-**v2.0 Enforcement Gates:**
+**Enforcement Gates:**
 
 | Gate | Check | Failure Action |
 |------|-------|----------------|
@@ -165,7 +165,7 @@ Phase 7: CRITIQUE     Self-assess with gate compliance → synthesis/critique.md
 
 ---
 
-## v2.0 Subsystems
+## Subsystems
 
 ### Full-Text Access Layer
 
@@ -301,7 +301,7 @@ The system auto-detects complexity from SPEC and applies presets:
 
 ## Extraction Template
 
-**v2.0: 11 Essential Fields:**
+**11 Essential Fields:**
 ```markdown
 - Citation: {full}
 - Type: ACADEMIC | PRACTITIONER | OTHER

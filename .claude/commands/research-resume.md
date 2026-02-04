@@ -27,7 +27,7 @@ Read `research/{slug}/STATE.json` to get:
 - Last completed phase
 - Preset configuration
 - Research units
-- Deliverable type (for v2.0 conditional files)
+- Deliverable type (for conditional files)
 
 If STATE.json doesn't exist but SPEC.md does:
 - Resume from Phase 1 (Parse)
@@ -80,7 +80,7 @@ research/{slug}/
 | 6. Synthesize | Pending |
 | 7. Critique | Pending |
 
-**v2.0 Files:**
+**Additional Files:**
 | File | Status |
 |------|--------|
 | dedup_log.json | Present |
@@ -105,7 +105,7 @@ Create research/{slug}/SPEC.md first.
 1. Parse SPEC.md
 2. Auto-detect complexity
 3. Detect recency policy from topic
-4. Write STATE.json (v2.0 schema)
+4. Write STATE.json
 5. Continue to Phase 2
 
 #### STATE.json exists, no discovery/*.md
@@ -132,14 +132,14 @@ Create research/{slug}/SPEC.md first.
 9. Continue to Phase 4
 
 #### discovery complete, dedup_log.json missing
-**Resume at Deduplication** (v2.0 sub-phase)
+**Resume at Deduplication**
 1. Read all discovery files
 2. Run deduplication pipeline
 3. Write `logs/dedup_log.json`
 4. Continue with retraction check
 
 #### SOURCES.md exists, retraction_flags.json missing
-**Resume at Retraction Check** (v2.0 sub-phase)
+**Resume at Retraction Check**
 1. Read SOURCES.md
 2. Query Crossref for retraction status of all DOIs
 3. Flag retracted papers and expressions of concern
@@ -159,7 +159,7 @@ Create research/{slug}/SPEC.md first.
 1. Read all findings files
 2. If VERDICT/COMPARISON: Read findings_structured.json
 3. Build claims registry
-4. Calculate confidence with v2.0 gates:
+4. Calculate confidence with gates:
    - Gate A: Depth (HIGH needs 2+ FULLTEXT Tier-1/2)
    - Gate B: Safety (counterevidence pass ran)
    - Gate C: Retraction (no retracted in HIGH claims)
@@ -180,7 +180,7 @@ Create research/{slug}/SPEC.md first.
 #### synthesis/final_deliverable.md exists, no synthesis/critique.md
 **Resume Phase 7: Critique**
 1. Read deliverable
-2. Assess quality including v2.0 checks:
+2. Assess quality including gate checks:
    - Access depth coverage
    - Gate compliance
    - Retraction status
@@ -199,7 +199,7 @@ All 7 phases completed.
 - claims.md - Evidence registry
 - SOURCES.md - Source list
 
-**v2.0 Quality:**
+**Quality:**
 - FULLTEXT coverage: X%
 - Retracted sources: N
 - Duplicates removed: N
@@ -238,7 +238,7 @@ After each phase, write to `logs/checkpoint.md`:
 ## Checkpoint: {timestamp}
 Phase: {N}
 Status: {complete|partial}
-v2.0 Checks:
+Gate Checks:
   - Dedup: {complete|pending}
   - Retraction: {complete|pending}
   - Validation: {pass|warn|fail|pending}
@@ -266,7 +266,7 @@ Report progress as you work:
   - Run: /research-validate {slug}
 ```
 
-### v2.0 Resume Decision Tree
+### Resume Decision Tree
 
 ```
 discovery complete?

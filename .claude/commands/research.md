@@ -1,12 +1,12 @@
 ---
 name: research
-description: Execute autonomous research with v2.0 7-phase workflow including gates, snowballing, and full-text access
+description: Execute autonomous research with 7-phase workflow including gates, snowballing, and full-text access
 user_prompt: true
 ---
 
 # /research {slug} [--quick|--standard|--thorough|--decision-support]
 
-Execute a comprehensive, autonomous research workflow that produces high-quality output through 7 systematic phases with v2.0 enhancements.
+Execute a comprehensive, autonomous research workflow that produces high-quality output through 7 systematic phases.
 
 ## INVOCATION
 
@@ -27,7 +27,7 @@ The user provides a research slug and optional preset:
 
 ## PHASE 1: PARSE
 
-**Objective**: Parse SPEC, detect complexity, determine recency policy, initialize v2.0 state.
+**Objective**: Parse SPEC, detect complexity, determine recency policy, initialize state.
 
 ### Instructions
 
@@ -93,7 +93,7 @@ max_age_years = {
    - Include synonyms and variants
    - Add negation terms if contested_flag
 
-7. **Write STATE.json v2.0**:
+7. **Write STATE.json**:
 
 ```json
 {
@@ -521,7 +521,7 @@ Read `research/{slug}/STATE.json` for extraction_depth:
 - **medium** (standard): Extract top 3 per unit
 - **deep** (thorough): Extract top 5 per unit
 
-### v2.0 Extraction Template (11 Fields)
+### Extraction Template (11 Fields)
 
 ```markdown
 ## Source: {title}
@@ -551,7 +551,7 @@ Read `research/{slug}/STATE.json` for extraction_depth:
 TaskCreate:
   subject: "Extract Batch {N} for {slug}"
   description: |
-    Extract evidence from these sources using the v2.0 template.
+    Extract evidence from these sources using the extraction template.
 
     SOURCES:
     {list with URLs and access tags}
@@ -653,7 +653,7 @@ TaskCreate:
    - Calculate confidence for each claim
    - Track access depth of supporting sources
 
-4. **v2.0 Confidence Calculation with Depth Gate**:
+4. **Confidence Calculation with Depth Gate**:
 
 ```javascript
 function calculateConfidence(sources) {
@@ -1052,12 +1052,12 @@ What would you like to explore further?
 
 ---
 
-## FILE STRUCTURE (v2.0)
+## FILE STRUCTURE
 
 ```
 research/{slug}/
 ├── SPEC.md                      # Input specification
-├── STATE.json                   # Workflow state v2.0 (with gates, config)
+├── STATE.json                   # Workflow state (with gates, config)
 ├── SOURCES.md                   # Curated source list with access tags
 ├── claims.md                    # Evidence registry with gate checks
 ├── discovery/

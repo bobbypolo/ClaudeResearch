@@ -23,7 +23,7 @@ If `research/{slug}/STATE.json` exists, read it to get:
 - Preset configuration
 - Research units
 - Min sources per unit
-- Deliverable type (for v2.0 conditional files)
+- Deliverable type (for conditional files)
 
 ### Step 3: Check File Existence
 
@@ -73,7 +73,7 @@ If claims.md exists:
 - Count claims by confidence (HIGH, LOW, CONTESTED)
 - Identify any gaps
 
-**v2.0 Statistics:**
+**Statistics:**
 
 If findings files exist, count by access depth:
 - FULLTEXT: Sources with full text extracted
@@ -120,14 +120,14 @@ Status: [NOT STARTED | IN PROGRESS | COMPLETE]
 | Practitioner | N | 25% |
 | Other | N | 5% |
 
-### v2.0 Access Depth
+### Access Depth
 | Access Level | Count | Percentage |
 |--------------|-------|------------|
 | FULLTEXT | N | X% |
 | ABSTRACT_ONLY | N | X% |
 | PAYWALLED | N | X% |
 
-### v2.0 Quality Checks
+### Quality Checks
 | Check | Status |
 |-------|--------|
 | Retracted flagged | N sources |
@@ -146,7 +146,7 @@ Status: [NOT STARTED | IN PROGRESS | COMPLETE]
 |---------------|---------|--------|
 | {unit1} | N | [OK|GAP] |
 
-### v2.0 Conditional Files
+### Conditional Files
 | File | Required For | Status |
 |------|--------------|--------|
 | grey_literature.md | BLUEPRINT | [Present|Missing|N/A] |
@@ -169,7 +169,7 @@ Status: [NOT STARTED | IN PROGRESS | COMPLETE]
 
 **If complete:** Review `synthesis/final_deliverable.md` and `synthesis/critique.md`
 
-### Step 8: v2.0 Validation Summary
+### Step 8: Validation Summary
 
 If `logs/validation.json` exists, display last validation result:
 

@@ -1,6 +1,6 @@
-# Research ADE v2.0 - Schemas and Rubrics
+# Research ADE v4.0 - Schemas and Rubrics
 
-Comprehensive reference for the Research ADE v2.0 system with gates, full-text access, and structured extraction.
+Comprehensive reference for the Research ADE system with gates, full-text access, and structured extraction.
 
 ---
 
@@ -33,7 +33,7 @@ domain_hint: enum                # fast_moving | scientific | historical (for re
 
 ---
 
-## 2. STATE.json Schema v2.0
+## 2. STATE.json Schema
 
 Written by Phase 1 (Parse), read by all subsequent phases.
 
@@ -131,7 +131,7 @@ Written by Phase 1 (Parse), read by all subsequent phases.
 | **2** | arXiv (credentialed authors), patents, tech reports | MEDIUM |
 | **3** | Expert blogs, documentation, whitepapers | LOW |
 
-### Access Depth Tags (v2.0)
+### Access Depth Tags
 
 | Tag | Meaning | Can Support HIGH? |
 |-----|---------|-------------------|
@@ -152,15 +152,15 @@ Written by Phase 1 (Parse), read by all subsequent phases.
 
 ---
 
-## 4. Confidence Levels (v2.0 with Depth Gate)
+## 4. Confidence Levels (with Depth Gate)
 
-| Level | Requirement | v2.0 Addition |
+| Level | Requirement | Gate Requirement |
 |-------|-------------|---------------|
 | **HIGH** | 3+ Tier-1/2 academic sources agree | AND >= 2 must be FULLTEXT |
 | **LOW** | 1-2 sources OR only Tier-2/3 | OR insufficient FULLTEXT access |
 | **CONTESTED** | Credible sources disagree | Present both sides |
 
-**v2.0 Decision Tree:**
+**Decision Tree:**
 ```
 Do sources agree?
 ├── No (credible disagreement) → CONTESTED
@@ -179,7 +179,7 @@ Do sources agree?
 
 ---
 
-## 5. Extraction Template (v2.0 - 11 Fields)
+## 5. Extraction Template (11 Fields)
 
 ```markdown
 ## Source: {title}
@@ -204,9 +204,9 @@ Do sources agree?
 | Citation | Yes | Full academic citation format |
 | Type | Yes | ACADEMIC / PRACTITIONER / OTHER |
 | Tier | Yes | 1, 2, or 3 |
-| Extraction depth | Yes (v2.0) | FULLTEXT / ABSTRACT_ONLY / PAYWALLED |
-| Source URL | Yes (v2.0) | Best available URL (OA preferred) |
-| Sections extracted | Yes (v2.0) | List of sections actually accessed |
+| Extraction depth | Yes | FULLTEXT / ABSTRACT_ONLY / PAYWALLED |
+| Source URL | Yes | Best available URL (OA preferred) |
+| Sections extracted | Yes | List of sections actually accessed |
 | Main claim | Yes | Single sentence summary |
 | Key evidence | Yes | Direct quote with location |
 | Limitations | Yes | Caveats and gaps |
@@ -215,7 +215,7 @@ Do sources agree?
 
 ---
 
-## 6. Structured Extraction Schema (v2.0)
+## 6. Structured Extraction Schema
 
 **Applies to**: VERDICT and COMPARISON deliverables only.
 
@@ -671,7 +671,7 @@ function assignAccessDepth(source, unpaywallResponse) {
 2. Prefer: replicated > out-of-sample > single study
 3. Prefer: recent > older (evolving topics)
 4. Prefer: higher tier > lower tier
-5. **v2.0**: Prefer FULLTEXT > ABSTRACT_ONLY (can verify claims)
+5. Prefer FULLTEXT > ABSTRACT_ONLY (can verify claims)
 
 **Categories:**
 - **RESOLVED**: One position clearly stronger
@@ -697,7 +697,7 @@ function assignAccessDepth(source, unpaywallResponse) {
 
 ---
 
-## 16. Critique Checklist (v2.0)
+## 16. Critique Checklist
 
 Before finalizing, verify:
 
@@ -714,7 +714,7 @@ Before finalizing, verify:
 
 ---
 
-## 17. Presets Reference (v2.0)
+## 17. Presets Reference
 
 | Preset | Sources/Unit | Extraction | Passes | Snowball | Counterevidence |
 |--------|--------------|------------|--------|----------|-----------------|
@@ -737,12 +737,12 @@ Before finalizing, verify:
 
 ---
 
-## 18. File Structure Reference (v2.0)
+## 18. File Structure Reference
 
 ```
 research/{slug}/
 ├── SPEC.md                      # Input specification
-├── STATE.json                   # v2.0 state with gates & config
+├── STATE.json                   # Workflow state with gates & config
 ├── SOURCES.md                   # Source list with access tags
 ├── claims.md                    # Evidence registry with gate checks
 ├── discovery/

@@ -1,4 +1,4 @@
-# Research ADE - Setup Guide
+# Research ADE v4.0 - Setup Guide
 
 ## MCP Server Configuration
 
@@ -42,6 +42,7 @@ Add to your Claude Code MCP configuration:
 | OpenAlex | Free | No key needed |
 | arXiv | Free | No key needed |
 | Crossref | Free | No key needed |
+| Unpaywall | Free | No key needed (uses email for identification) |
 | Exa | Paid | https://exa.ai |
 | Firecrawl | Paid | https://firecrawl.dev |
 
@@ -50,8 +51,10 @@ Add to your Claude Code MCP configuration:
 | Phase | Tools |
 |-------|-------|
 | Discovery | `mcp__openalex__search_works`, `mcp__arxiv__search_papers`, `mcp__exa__web_search_exa` |
+| Snowballing | `mcp__openalex__get_work_references`, `mcp__openalex__get_work_citations` |
+| Full-Text | WebFetch to Unpaywall API, `mcp__firecrawl__firecrawl_scrape` |
 | Extraction | `mcp__arxiv__read_paper`, `mcp__firecrawl__firecrawl_scrape` |
-| Verification | `mcp__crossref__getWorkByDOI` (sparingly) |
+| Verification | `mcp__crossref__getWorkByDOI` (retraction check, metadata) |
 
 ---
 
@@ -75,17 +78,43 @@ A working demo is included at `research/demo/` showing complete output.
 
 ---
 
+## v4.0 Features Setup
+
+### Unpaywall Integration (Full-Text Access)
+
+No configuration needed. The system uses WebFetch to query:
+```
+https://api.unpaywall.org/v2/{doi}?email=research@example.com
+```
+
+Returns OA status (gold/green/hybrid/bronze/closed) and PDF URLs when available.
+
+### Citation Snowballing
+
+Uses OpenAlex tools already configured:
+- `mcp__openalex__get_work_references` - Backward snowball (what does this paper cite?)
+- `mcp__openalex__get_work_citations` - Forward snowball (what papers cite this?)
+
+### Retraction Checking
+
+Uses Crossref API via `mcp__crossref__getWorkByDOI`:
+- Checks `relation.is-retracted-by` field
+- Checks `update-to` for corrections
+- Results logged to `logs/retraction_flags.json`
+
+---
+
 ## Performance Expectations
 
 Based on actual workflow execution:
 
-| Preset | Agents | Duration | Sources |
-|--------|--------|----------|---------|
-| `--quick` | 2 parallel | ~2-3 min | ~15-20 |
-| `--standard` | 2 parallel | ~4-5 min | ~40-50 |
-| `--thorough` | 3 parallel | ~6-8 min | ~60-80 |
+| Preset | Agents | Duration | Sources | Snowball |
+|--------|--------|----------|---------|----------|
+| `--quick` | 2 parallel | ~2-3 min | ~15-20 | No |
+| `--standard` | 3 parallel | ~5-7 min | ~40-50 | Yes |
+| `--thorough` | 4 parallel | ~8-12 min | ~60-80 | Yes |
 
-*Duration depends on MCP server response times and extraction complexity.*
+*Duration depends on MCP server response times, snowball depth, and extraction complexity.*
 
 ---
 
@@ -103,10 +132,11 @@ To reduce approval prompts during research:
 ### Option 2: Session Approval
 
 When prompted, approve tools for the session:
-- `mcp__openalex__*` - Academic searches
+- `mcp__openalex__*` - Academic searches + snowballing
 - `mcp__arxiv__*` - Preprint searches
 - `mcp__exa__*` - Web searches
 - `mcp__firecrawl__*` - Content extraction
+- `mcp__crossref__*` - DOI validation + retraction check
 
 ---
 
@@ -117,23 +147,34 @@ After running `/research {slug}`:
 ```
 research/{slug}/
 ├── SPEC.md                     # Your input
-├── STATE.json                  # Workflow config
+├── STATE.json                  # Workflow state and config
 │
 ├── discovery/
 │   ├── academic.md             # OpenAlex + arXiv
-│   └── practitioner.md         # Exa web sources
+│   ├── practitioner.md         # Exa web sources
+│   ├── counterevidence.md      # Critiques (standard+ presets)
+│   ├── grey_literature.md      # BLUEPRINT only (v4.0)
+│   └── snowball.md             # Citation snowballing (v4.0)
 │
-├── SOURCES.md                  # Curated list
+├── SOURCES.md                  # Curated list with access tags
 │
 ├── topics/
 │   └── {unit}/
-│       └── findings.md         # Extracted evidence
+│       ├── findings.md         # Extracted evidence
+│       └── findings_structured.json  # Structured data (v4.0)
 │
-├── claims.md                   # Evidence registry
+├── claims.md                   # Evidence registry with gate checks
 │
-└── synthesis/
-    ├── final_deliverable.md    # PRIMARY OUTPUT
-    └── critique.md             # Limitations
+├── synthesis/
+│   ├── final_deliverable.md    # PRIMARY OUTPUT
+│   ├── critique.md             # Limitations
+│   └── contradictions.md       # If contested
+│
+└── logs/
+    ├── runlog.ndjson           # Tool execution log
+    ├── checkpoint.md           # Resume checkpoint
+    ├── dedup_log.json          # Deduplication decisions (v4.0)
+    └── retraction_flags.json   # Retraction check results (v4.0)
 ```
 
 ---
@@ -156,9 +197,17 @@ MCP server not loaded. Restart Claude Code or check config:
 ### "Extraction failed"
 
 Firecrawl may be rate-limited or URL inaccessible:
-- System marks source as "Abstract only"
-- Continues with available content
+- System tries Unpaywall for OA version first
+- Falls back to abstract if no full-text available
+- Marks source as "ABSTRACT_ONLY" or "PAYWALLED"
 - Documents gap in `synthesis/critique.md`
+
+### "Retracted paper found"
+
+System auto-excludes retracted papers:
+- Logged in `logs/retraction_flags.json`
+- Removed from SOURCES.md
+- Cannot support HIGH confidence claims
 
 ### "Research interrupted"
 
@@ -189,11 +238,28 @@ The included `research/demo/` contains a complete example:
 
 ---
 
-## Version 3.0
+## Commands Reference
 
-Simplified from v2.0:
-- 7 phases (was 10)
-- 3 confidence levels (was 4)
-- 8-field extraction (was 20+)
-- No Core/Supporting classification
-- Auto-complexity detection
+| Command | Description |
+|---------|-------------|
+| `/research {slug}` | Execute full 7-phase workflow |
+| `/research {slug} --quick` | Fast mode (2 sources/unit) |
+| `/research {slug} --standard` | Default (3 sources/unit + snowball) |
+| `/research {slug} --thorough` | Deep (5 sources/unit + all gates) |
+| `/research-status {slug}` | Check progress and statistics |
+| `/research-resume {slug}` | Continue interrupted research |
+| `/research-validate {slug}` | Check gates before synthesis |
+| `/cite {DOI}` | Quick citation lookup with OA status |
+
+---
+
+## Version 4.0
+
+Enhanced from v3.0 with:
+- Full-text access via Unpaywall integration
+- Citation snowballing (forward + backward)
+- Enforcement gates (Depth, Safety, Retraction)
+- Structured data extraction for VERDICT/COMPARISON
+- Grey literature pass for BLUEPRINT
+- Domain-aware recency policies
+- Enhanced deduplication pipeline

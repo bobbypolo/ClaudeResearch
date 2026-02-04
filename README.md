@@ -199,7 +199,7 @@ Primary outputs:
 ```
 research/{slug}/
 ├── SPEC.md                     # Your specification (input)
-├── STATE.json                  # Workflow state and config (v2.0)
+├── STATE.json                  # Workflow state and config
 ├── discovery/
 │   ├── academic.md             # OpenAlex + arXiv results
 │   ├── practitioner.md         # Exa results
