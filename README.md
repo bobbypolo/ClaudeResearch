@@ -54,10 +54,11 @@ Research ADE executes comprehensive, evidence-based research in a single session
 
 ## Example Output
 
-See `research/demo/` for a complete example:
-- **Topic**: RAG Fundamentals
-- **Sources**: 15 curated from 51 discovered
-- **Claims**: 14 (10 HIGH, 4 LOW confidence)
+See `research/v4-test/` for a complete v4.0 example:
+- **Topic**: Prompt Engineering Techniques
+- **Sources**: 25 curated from 31 discovered
+- **Claims**: 9 (all LOW due to quick preset)
+- **Gates**: All passed (Depth, Retraction)
 - **Output**: `synthesis/final_deliverable.md`
 
 ---
@@ -306,7 +307,7 @@ See `docs/RESEARCH_SETUP.md` for:
 | `.claude/CLAUDE.md` | System constitution (7 principles) |
 | `.claude/rules/research.md` | Schemas and rubrics |
 | `templates/SPEC.md` | SPEC template |
-| `research/demo/` | Working example output |
+| `research/v4-test/` | Working v4.0 example output |
 
 ---
 
