@@ -199,25 +199,28 @@ Primary outputs:
 ```
 research/{slug}/
 ├── SPEC.md                     # Your specification (input)
-├── STATE.json                  # Workflow state and config
+├── STATE.json                  # Workflow state and config (v2.0)
 ├── discovery/
 │   ├── academic.md             # OpenAlex + arXiv results
 │   ├── practitioner.md         # Exa results
-│   ├── counterevidence.md      # Critiques (if run)
-│   └── snowball.md             # Citation snowballing results (NEW)
-├── SOURCES.md                  # Curated source list
+│   ├── counterevidence.md      # Critiques (standard+ presets)
+│   ├── grey_literature.md      # BLUEPRINT only (NEW)
+│   └── snowball.md             # Citation snowballing (NEW)
+├── SOURCES.md                  # Curated source list with access tags
 ├── topics/
 │   └── {unit}/
 │       ├── findings.md         # Extracted evidence per unit
-│       └── findings.json       # Structured extraction (NEW)
-├── claims.md                   # Evidence registry
-├── claims.json                 # Machine-readable claims (NEW)
-├── validation/
-│   └── retraction_check.md     # Retraction scan results (NEW)
-└── synthesis/
-    ├── final_deliverable.md    # PRIMARY OUTPUT
-    ├── critique.md             # Quality assessment
-    └── contradictions.md       # If contested
+│       └── findings_structured.json  # Structured extraction (NEW)
+├── claims.md                   # Evidence registry with gate checks
+├── synthesis/
+│   ├── final_deliverable.md    # PRIMARY OUTPUT
+│   ├── critique.md             # Quality assessment
+│   └── contradictions.md       # If contested
+└── logs/
+    ├── runlog.ndjson           # Tool execution log
+    ├── checkpoint.md           # Resume checkpoint
+    ├── dedup_log.json          # Deduplication decisions (NEW)
+    └── retraction_flags.json   # Retraction check results (NEW)
 ```
 
 ---
@@ -238,7 +241,7 @@ research/{slug}/
 
 | Level | Requirement | Display |
 |-------|-------------|---------|
-| **HIGH** | 3+ Tier-1 sources agree AND 2+ full-text accessed | Stated with confidence |
+| **HIGH** | 3+ Tier-1/2 sources agree AND 2+ full-text accessed | Stated with confidence |
 | **LOW** | 1-2 sources only OR abstract-only extraction | Flagged as tentative |
 | **CONTESTED** | Sources disagree | Both positions presented |
 

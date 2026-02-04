@@ -128,7 +128,10 @@ max_age_years = {
     "sources_found": 0,
     "sources_deduplicated": 0,
     "fulltext_resolved": 0,
-    "retractions_found": 0
+    "abstract_only": 0,
+    "paywalled": 0,
+    "retractions_found": 0,
+    "snowball_added": 0
   }
 }
 ```
