@@ -1,0 +1,312 @@
+{
+  "timestamp": "2026-02-04T12:00:00Z",
+  "total_before": 66,
+  "total_after": 58,
+  "unique_sources_curated": 58,
+  "counterevidence_sources": 8,
+  "excluded_sources": 15,
+  "merges": [
+    {
+      "canonical_key": "doi:10.1016/j.jbef.2018.01.010",
+      "kept": {
+        "title": "Why do some soccer bettors lose more money than others?",
+        "source_file": "academic.md",
+        "access": "FULLTEXT",
+        "reason": "Original academic source with complete metadata"
+      },
+      "dropped": [
+        {
+          "title": "Why do some soccer bettors lose more money than others?",
+          "source_file": "snowball.md",
+          "reason": "Duplicate entry from snowball expansion (SB4)"
+        }
+      ]
+    },
+    {
+      "canonical_key": "fp:machine learning for sports betting should|walsh|2024",
+      "kept": {
+        "title": "Machine learning for sports betting: Should model selection be based on accuracy or calibration?",
+        "source_file": "practitioner.md",
+        "url": "https://www.sciencedirect.com/science/article/pii/S266682702400015X",
+        "access": "FULLTEXT",
+        "reason": "Peer-reviewed journal version (ScienceDirect) preferred over preprint"
+      },
+      "dropped": [
+        {
+          "title": "Machine learning for sports betting: Should model selection be based on accuracy or calibration?",
+          "source_file": "practitioner.md",
+          "url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4705918",
+          "reason": "SSRN preprint duplicate of journal publication"
+        }
+      ]
+    },
+    {
+      "canonical_key": "fp:same game parlays the mathematics of correlation|wizardofodds|2025",
+      "kept": {
+        "title": "Same-Game Parlays: The Mathematics of Correlation",
+        "source_file": "practitioner.md",
+        "url": "https://wizardofodds.com/article/same-game-parlays-the-mathematics-of-correlation/",
+        "access": "FULLTEXT",
+        "reason": "Primary practitioner source with full technical detail"
+      },
+      "dropped": [
+        {
+          "title": "Same-Game Parlays: The Mathematics of Correlation",
+          "source_file": "counterevidence.md",
+          "entry": "CE11",
+          "reason": "Same source cited in counterevidence pass"
+        }
+      ]
+    },
+    {
+      "canonical_key": "fp:same game parlay correlation how the hidden|oddsindex|2025",
+      "kept": {
+        "title": "Same Game Parlay Correlation: How the Hidden Tax on SGPs Really Works",
+        "source_file": "practitioner.md",
+        "url": "https://oddsindex.com/guides/same-game-parlay-correlation",
+        "access": "FULLTEXT",
+        "reason": "Comprehensive practitioner guide on correlation pricing"
+      },
+      "dropped": [
+        {
+          "title": "Same Game Parlay Correlation: How the Hidden Tax on SGPs Really Works",
+          "source_file": "counterevidence.md",
+          "entry": "CE12",
+          "reason": "Duplicate citation in counterevidence"
+        }
+      ]
+    },
+    {
+      "canonical_key": "fp:correlation in same game parlays how sports|opticodds|2025",
+      "kept": {
+        "title": "Correlation in Same Game Parlays: How Sportsbooks are Tackling the Challenge",
+        "source_file": "practitioner.md",
+        "url": "https://opticodds.com/blog/correlation-in-same-game-parlays",
+        "access": "FULLTEXT",
+        "reason": "Technical industry perspective on correlation pricing"
+      },
+      "dropped": [
+        {
+          "title": "Correlation in Same Game Parlays: How Sportsbooks are Tackling...",
+          "source_file": "counterevidence.md",
+          "entry": "CE13",
+          "reason": "Same source abbreviated in counterevidence"
+        }
+      ]
+    },
+    {
+      "canonical_key": "fp:building a dependable real time betting app|confluent|2022",
+      "kept": {
+        "title": "Building a Dependable Real-Time Betting App with Confluent Cloud and Ably",
+        "source_file": "practitioner.md",
+        "url": "https://confluent.io/blog/real-time-betting-platform-with-confluent-cloud-and-ably",
+        "access": "FULLTEXT",
+        "reason": "Original Confluent technical blog post"
+      },
+      "dropped": [
+        {
+          "title": "Building a dependable realtime betting app with Confluent Cloud and Ably",
+          "source_file": "practitioner.md",
+          "url": "https://ably.com/blog/a-real-time-betting-app-with-kafka-and-ably",
+          "reason": "Cross-posted content on Ably blog (same technical content)"
+        }
+      ]
+    },
+    {
+      "canonical_key": "fp:building ml ops capabilities for scalable ai|huddle|2025",
+      "kept": {
+        "title": "Building ML Ops Capabilities for Scalable AI in Sports Betting",
+        "source_file": "practitioner.md",
+        "url": "https://huddle.tech/wp-content/uploads/2025/02/Building-ML-Ops-Capabilities-for-Scalable-AI-in-Sports-Betting-1.pdf",
+        "access": "FULLTEXT",
+        "reason": "PDF whitepaper version has more detail"
+      },
+      "dropped": [
+        {
+          "title": "Building ML Ops Capabilities for Scalable AI (Blog)",
+          "source_file": "practitioner.md",
+          "url": "https://huddle.tech/building-ml-ops-capabilities-for-scalable-ai-in-sports-betting/",
+          "reason": "Blog summary of same whitepaper content"
+        }
+      ]
+    },
+    {
+      "canonical_key": "fp:calibration of sports betting markets|mikesblog|2023",
+      "kept": {
+        "title": "AI Model Calibration: Brier Score, Reliability Curves & Sustainable Betting Edge",
+        "source_file": "practitioner.md",
+        "url": "https://www.sports-ai.dev/blog/ai-model-calibration-brier-score",
+        "access": "FULLTEXT",
+        "reason": "More comprehensive technical treatment of calibration"
+      },
+      "dropped": [
+        {
+          "title": "Calibration of Sports Betting Markets",
+          "source_file": "practitioner.md",
+          "url": "https://www.mikesblog.net/p/calibration-of-sports-betting-markets",
+          "reason": "Overlapping content with less implementation detail"
+        }
+      ]
+    }
+  ],
+  "exclusion_decisions": [
+    {
+      "title": "Predicting the Outcome of NBA Playoffs Based on Maximum Entropy Principle",
+      "source_file": "academic.md",
+      "reason": "Low citation count (12), preprint, limited direct relevance to core probability system questions"
+    },
+    {
+      "title": "Context is key: normalization as a novel approach to sport specific preprocessing",
+      "source_file": "academic.md",
+      "reason": "Preprocessing focus tangential to probability estimation objectives"
+    },
+    {
+      "title": "A football player rating system",
+      "source_file": "academic.md",
+      "reason": "Elo ratings for player evaluation; limited direct applicability to parlay probability"
+    },
+    {
+      "title": "National Sentiment and Economic Behavior",
+      "source_file": "academic.md",
+      "reason": "Sentiment bias focus; peripheral to core sportsbook pricing mechanics"
+    },
+    {
+      "title": "Well-temperate phage: optimal bet-hedging against local environmental collapses",
+      "source_file": "academic.md",
+      "reason": "Biological Kelly application; limited transfer to sports betting context"
+    },
+    {
+      "title": "Using Machine Learning and Candlestick Patterns to Predict American Football",
+      "source_file": "academic.md",
+      "reason": "Novel unvalidated approach; low citation count (14)"
+    },
+    {
+      "title": "Predicting Limit-Setting Behavior of Gamblers Using Machine Learning",
+      "source_file": "academic.md",
+      "reason": "Responsible gambling focus; not edge detection or probability calibration"
+    },
+    {
+      "title": "On Predicting Soccer Outcomes in the Greek League Using Machine Learning",
+      "source_file": "academic.md",
+      "reason": "Limited geographic scope; low generalizability"
+    },
+    {
+      "title": "SGP Engine by OpticOdds",
+      "source_file": "counterevidence.md",
+      "entry": "CE16",
+      "reason": "Commercial product description; not research content"
+    },
+    {
+      "title": "The Hidden Risk of Same Game Parlays (YouTube)",
+      "source_file": "counterevidence.md",
+      "entry": "CE14",
+      "reason": "Video content; not citable as academic/practitioner source"
+    },
+    {
+      "title": "What the Sportsbooks Aren't Telling You About SGPs (YouTube)",
+      "source_file": "counterevidence.md",
+      "entry": "CE15",
+      "reason": "Video content; not citable"
+    },
+    {
+      "title": "Parlay Betting Math on House Edge (Reddit)",
+      "source_file": "counterevidence.md",
+      "entry": "CE6",
+      "reason": "Forum content; not authoritative source. Arguments retained in Nevada data source."
+    },
+    {
+      "title": "Real Time Quantification of Dangerousity in Football",
+      "source_file": "snowball.md",
+      "reason": "Real-time event probability; peripheral to parlay joint probability modeling"
+    },
+    {
+      "title": "Behavioral Economics: Past, Present, Future",
+      "source_file": "snowball.md",
+      "reason": "Foundational behavioral economics but too broad; not sports-betting specific"
+    },
+    {
+      "title": "Anomalies: The Winner's Curse",
+      "source_file": "snowball.md",
+      "reason": "General market anomalies; more specific FLB sources included"
+    }
+  ],
+  "tier_summary": {
+    "tier_1": 35,
+    "tier_2": 17,
+    "tier_3": 6,
+    "tier_1_percent": 60.3,
+    "tier_2_percent": 29.3,
+    "tier_3_percent": 10.4
+  },
+  "type_summary": {
+    "academic": 41,
+    "practitioner": 14,
+    "other": 3,
+    "academic_percent": 70.7,
+    "practitioner_percent": 24.1,
+    "other_percent": 5.2
+  },
+  "access_summary": {
+    "fulltext": 38,
+    "abstract_only": 15,
+    "paywalled": 5,
+    "fulltext_percent": 65.5
+  },
+  "unit_coverage": {
+    "feasibility": {
+      "sources": 9,
+      "tier_1": 7,
+      "tier_2": 1,
+      "tier_3": 1,
+      "fulltext": 9
+    },
+    "single-leg-probability": {
+      "sources": 8,
+      "tier_1": 7,
+      "tier_2": 0,
+      "tier_3": 1,
+      "fulltext": 7
+    },
+    "joint-probability": {
+      "sources": 8,
+      "tier_1": 5,
+      "tier_2": 1,
+      "tier_3": 2,
+      "fulltext": 7
+    },
+    "sportsbook-pricing": {
+      "sources": 9,
+      "tier_1": 6,
+      "tier_2": 2,
+      "tier_3": 1,
+      "fulltext": 6
+    },
+    "parlay-optimization": {
+      "sources": 9,
+      "tier_1": 8,
+      "tier_2": 0,
+      "tier_3": 1,
+      "fulltext": 7
+    },
+    "backtesting-monitoring": {
+      "sources": 8,
+      "tier_1": 5,
+      "tier_2": 1,
+      "tier_3": 2,
+      "fulltext": 7
+    },
+    "system-architecture": {
+      "sources": 7,
+      "tier_1": 3,
+      "tier_2": 4,
+      "tier_3": 0,
+      "fulltext": 7
+    }
+  },
+  "notes": [
+    "Tier 3 sources elevated above 5% target due to high-quality SGP correlation practitioner content",
+    "System architecture unit has more Tier 2 due to reference architectures (AWS, Confluent) which are authoritative but not peer-reviewed",
+    "65.5% FULLTEXT access rate sufficient for HIGH confidence claims requiring 2+ FULLTEXT sources per unit",
+    "8 counterevidence sources provide cross-cutting critical perspective for Safety Gate B compliance"
+  ]
+}

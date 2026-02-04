@@ -23,43 +23,48 @@ If `research/{slug}/STATE.json` exists, read it to get:
 - Preset configuration
 - Research units
 - Min sources per unit
-- Deliverable type (for conditional files)
+- Deliverable type
+- Plan approval status
+- Gate statuses
 
 ### Step 3: Check File Existence
 
-Scan for these files:
+Scan for these files (v5.0 structure):
 
 | File | Phase | Purpose |
 |------|-------|---------|
-| `SPEC.md` | Input | Research specification |
-| `STATE.json` | 1 | Workflow state |
+| `PLAN.md` | 0 | Research plan (requires approval) |
+| `SPEC.md` | Input | Research specification (Goal, not Question) |
+| `STATE.json` | 1 | Workflow state (v3.0 schema) |
 | `discovery/academic.md` | 2 | Academic sources |
 | `discovery/practitioner.md` | 2 | Practitioner sources (optional) |
-| `discovery/counterevidence.md` | 2 | Counterevidence (required for >=standard) |
+| `discovery/failure_analysis.md` | 2 | Failure studies (required for >=standard) |
 | `discovery/grey_literature.md` | 2 | Grey literature (BLUEPRINT only) |
 | `discovery/snowball.md` | 2 | Citation snowball expansion |
-| `SOURCES.md` | 3 | Curated source list |
-| `topics/*/findings.md` | 4 | Extracted evidence |
-| `topics/*/findings_structured.json` | 4 | Structured extraction (VERDICT/COMPARISON) |
-| `claims.md` | 5 | Evidence registry |
+| `SOURCES.md` | 3 | Curated source list with impl detail flags |
+| `topics/*/findings.md` | 3-4 | Extracted evidence (12 fields) |
+| `topics/*/findings_structured.json` | 3-4 | Structured extraction |
+| `synthesis/risk_mitigations.md` | 4 | Risk-mitigation pairs |
+| `claims.md` | 5 | Evidence registry with gate checks |
+| `synthesis/gaps.md` | 5 | Gap declarations (if any) |
 | `synthesis/final_deliverable.md` | 6 | Main output |
 | `synthesis/critique.md` | 7 | Quality assessment |
 | `logs/retraction_flags.json` | 3 | Retraction check results |
 | `logs/dedup_log.json` | 3 | Deduplication decisions |
-| `logs/validation.json` | 5 | Pre-synthesis validation |
 
-### Step 4: Determine Current Phase
+### Step 4: Determine Current Phase (v5.0 - 8 Phases)
 
 | Files Present | Phase | Status |
 |---------------|-------|--------|
 | None | - | Not started |
-| SPEC.md only | 1 | Ready to start |
-| STATE.json exists | 1 | Parse complete |
-| discovery/*.md files | 2 | Discovery complete |
-| SOURCES.md exists | 3 | Curation complete |
-| topics/*/findings.md | 4 | Extraction complete |
+| SPEC.md only | 0 | Ready to plan |
+| PLAN.md exists (not approved) | 0 | Awaiting plan approval |
+| PLAN.md + STATE.json | 1 | Parse complete |
+| discovery/*.md files | 2 | Survey complete |
+| SOURCES.md + topics/*/findings.md | 3 | Deep dive complete |
+| synthesis/risk_mitigations.md | 4 | Failure analysis complete |
 | claims.md exists | 5 | Compilation complete |
-| synthesis/final_deliverable.md | 6 | Synthesis complete |
+| synthesis/final_deliverable.md | 6 | Specification complete |
 | synthesis/critique.md | 7 | COMPLETE |
 
 ### Step 5: Gather Statistics
@@ -67,26 +72,30 @@ Scan for these files:
 If SOURCES.md exists:
 - Count sources by type (ACADEMIC, PRACTITIONER, OTHER)
 - Count by tier (1, 2, 3)
+- Count sources with implementation detail
 - Check coverage per research unit
 
 If claims.md exists:
 - Count claims by confidence (HIGH, LOW, CONTESTED)
-- Identify any gaps
+- Count recommendations vs findings
+- Identify declared gaps
 
-**Statistics:**
+**Access Depth Statistics:**
 
 If findings files exist, count by access depth:
 - FULLTEXT: Sources with full text extracted
 - ABSTRACT_ONLY: Sources with only abstract available
 - PAYWALLED: Sources behind paywall with no OA version
 
-If `logs/retraction_flags.json` exists:
-- Count retracted sources flagged
-- Count expressions of concern
+**Gate Statistics:**
 
-If `logs/dedup_log.json` exists:
-- Count duplicates removed
-- Count potential duplicates remaining
+If STATE.json gates exist:
+- Depth Gate: status, claims downgraded
+- Completion Gate: status, gaps declared
+- Retraction Gate: status, sources removed
+
+If `synthesis/risk_mitigations.md` exists:
+- Count risk-mitigation pairs
 
 ### Step 6: Output Status Report
 
@@ -94,24 +103,26 @@ If `logs/dedup_log.json` exists:
 ## Research Status: {slug}
 
 ### Current Phase
-Phase [N]/7: [Phase Name]
-Status: [NOT STARTED | IN PROGRESS | COMPLETE]
+Phase [N]/8: [Phase Name]
+Status: [NOT STARTED | AWAITING APPROVAL | IN PROGRESS | COMPLETE]
 
 ### Progress
+- [ ] Phase 0: Plan (PLAN.md - awaiting approval)
 - [x] Phase 1: Parse (SPEC.md -> STATE.json)
-- [x] Phase 2: Discover (discovery/*.md)
-- [x] Phase 3: Curate (SOURCES.md)
-- [ ] Phase 4: Extract (topics/*/findings.md)
+- [x] Phase 2: Survey (discovery/*.md)
+- [x] Phase 3: Deep Dive (SOURCES.md, topics/*/findings.md)
+- [ ] Phase 4: Failure (synthesis/risk_mitigations.md)
 - [ ] Phase 5: Compile (claims.md)
-- [ ] Phase 6: Synthesize (synthesis/final_deliverable.md)
-- [ ] Phase 7: Critique (synthesis/critique.md)
+- [ ] Phase 6: Specify (synthesis/final_deliverable.md)
+- [ ] Phase 7: Validate (synthesis/critique.md)
 
 ### Configuration
 - Preset: {preset}
+- Posture: optimistic-empirical
 - Min sources/unit: {min}
 - Extraction depth: {depth}
-- Contested: {yes/no}
-- Deliverable: {VERDICT|REPORT|COMPARISON|BLUEPRINT|BIBLIOGRAPHY}
+- Deliverable: {SPECIFICATION|VERDICT|REPORT|COMPARISON|BLUEPRINT|BIBLIOGRAPHY}
+- Plan approved: {yes/no}
 
 ### Sources
 | Type | Count | Target |
@@ -120,6 +131,12 @@ Status: [NOT STARTED | IN PROGRESS | COMPLETE]
 | Practitioner | N | 25% |
 | Other | N | 5% |
 
+### Implementation Detail
+| Category | Count |
+|----------|-------|
+| With impl detail | N |
+| Without impl detail | N |
+
 ### Access Depth
 | Access Level | Count | Percentage |
 |--------------|-------|------------|
@@ -127,33 +144,40 @@ Status: [NOT STARTED | IN PROGRESS | COMPLETE]
 | ABSTRACT_ONLY | N | X% |
 | PAYWALLED | N | X% |
 
-### Quality Checks
-| Check | Status |
-|-------|--------|
-| Retracted flagged | N sources |
-| Duplicates removed | N sources |
-| Potential duplicates | N remaining |
+### Gates (v5.0)
+| Gate | Status | Details |
+|------|--------|---------|
+| Depth (A) | PASSED/PENDING | N claims downgraded |
+| Completion (B) | PASSED/PENDING | N gaps declared |
+| Retraction (C) | PASSED/PENDING | N sources removed |
 
 ### Claims
 | Confidence | Count |
 |------------|-------|
 | HIGH | N |
-| LOW | N |
+| LOW (with gaps) | N |
 | CONTESTED | N |
 
-### Coverage
-| Research Unit | Sources | Status |
-|---------------|---------|--------|
-| {unit1} | N | [OK|GAP] |
+### Risk-Mitigation Pairs
+| Count | Source |
+|-------|--------|
+| N | failure_analysis.md |
 
-### Conditional Files
+### Coverage
+| Research Unit | Sources | Impl Detail | Status |
+|---------------|---------|-------------|--------|
+| {unit1} | N | N | [OK|GAP] |
+
+### Conditional Files (v5.0)
 | File | Required For | Status |
 |------|--------------|--------|
+| PLAN.md | All | [Present|Missing] |
+| failure_analysis.md | >=standard | [Present|Missing|N/A] |
+| risk_mitigations.md | >=standard | [Present|Missing|N/A] |
+| gaps.md | If LOW claims | [Present|Missing|N/A] |
 | grey_literature.md | BLUEPRINT | [Present|Missing|N/A] |
-| findings_structured.json | VERDICT/COMPARISON | [Present|Missing|N/A] |
+| findings_structured.json | SPECIFICATION/VERDICT/COMPARISON | [Present|Missing|N/A] |
 | snowball.md | >=standard | [Present|Missing|N/A] |
-| retraction_flags.json | All | [Present|Missing] |
-| dedup_log.json | All | [Present|Missing] |
 
 ### Next Steps
 - [Action based on current phase]
@@ -163,30 +187,32 @@ Status: [NOT STARTED | IN PROGRESS | COMPLETE]
 
 **If not started:** Create SPEC.md, then run `/research {slug}`
 
+**If plan awaiting approval:** Review PLAN.md and approve to continue
+
 **If in progress:** Run `/research-resume {slug}`
 
 **If pre-synthesis:** Run `/research-validate {slug}` to check quality gates
 
 **If complete:** Review `synthesis/final_deliverable.md` and `synthesis/critique.md`
 
-### Step 8: Validation Summary
+### Step 8: Gate Summary
 
-If `logs/validation.json` exists, display last validation result:
+Display gate compliance summary:
 
 ```
-### Last Validation
-- Date: {timestamp}
-- Overall: [PASS|PASS WITH WARNINGS|FAIL]
-- Checks:
-  - FULLTEXT coverage: {X}% ({status})
-  - Tier targets: {status}
-  - Retraction flags: {status}
-  - HIGH claim validity: {status}
-  - Deduplication: {status}
+### Gate Compliance
+| Gate | Requirement | Status |
+|------|-------------|--------|
+| Depth (A) | 2+ FULLTEXT T1/T2 for HIGH | {PASSED/FAILED} |
+| Completion (B) | HIGH confidence or gaps declared | {PASSED/FAILED} |
+| Retraction (C) | No retracted papers in claims | {PASSED/FAILED} |
+
+**Overall:** [ALL PASSED | N FAILED]
 ```
 
-If validation failed, highlight:
+If Completion Gate has gaps:
 ```
-⚠️ Validation FAILED - Address issues before synthesis
-Run `/research-validate {slug}` for details
+### Declared Gaps
+- Gap 1: {description}
+- Gap 2: {description}
 ```

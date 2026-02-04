@@ -1,124 +1,123 @@
-# Research ADE
+# Research ADE v5.0
 
 **Autonomous Research System for Claude Code**
 
-Research ADE executes comprehensive, evidence-based research in a single session using MCP tools to access academic databases (OpenAlex, arXiv) and web sources (Exa). Provide a SPEC, get a confidence-graded synthesis with full source traceability.
+Research ADE executes comprehensive, evidence-based research that produces **implementation-ready specifications**. The system uses MCP tools to access academic databases (OpenAlex, arXiv) and web sources (Exa), synthesizing findings into actionable guidance with full source traceability.
 
 ---
 
-## What's New in v4.0
+## What's New in v5.0
 
-### Full-Text Access via Unpaywall
-- Automatically retrieves open-access PDFs when available
-- Falls back to abstracts with clear "Abstract only" notation
-- No API key required (free service)
+### Implementation-Focused Output
+- **SPECIFICATION** is the new default deliverable
+- Outputs specific method recommendations with evidence
+- Every recommendation requires HIGH confidence or explicit gap declaration
+- No more "feasible under narrow conditions" conclusions
 
-### Enforcement Gates
-- **Depth Gate**: Validates extraction depth meets preset requirements
-- **Safety Gate**: Blocks sources without proper attribution or dates
-- **Retraction Gate**: Checks for retracted papers via Crossref API
+### Mandatory Planning Phase
+- Research begins with comprehensive plan (PLAN.md)
+- User approves plan before discovery starts
+- Prevents research drift and ensures alignment with goals
 
-### Citation Snowballing
-- Forward snowballing: Finds papers citing key sources
-- Backward snowballing: Examines reference lists
-- Discovers high-impact sources missed by keyword search
+### Failure Studies Replace Counterevidence
+- Find implementations that failed and extract lessons
+- Every risk paired with a mitigation from literature
+- Constructive learning, not defensive hedging
 
-### Enhanced Deduplication Pipeline
-- DOI-based exact matching
-- Title similarity (>90% threshold)
-- Author/year cross-validation
-- Prefers peer-reviewed over preprints over web sources
+### Completion Gate
+- Research only ends with HIGH confidence recommendations
+- LOW confidence claims require explicit gap declarations
+- Clear, actionable output guaranteed
 
-### Structured Data Extraction
-- Standardized JSON output for claims
-- Machine-readable source metadata
-- Cross-reference tracking between claims and sources
+### Optimistic-Empirical Posture
+- Default assumption: "Solutions exist until proven otherwise"
+- Focus on "how to build" not "is it possible"
+- Implementation-oriented search strategies
 
-### Grey Literature Access
-- Government reports (via gov domain filtering)
-- Technical standards documents
-- Conference proceedings beyond major venues
+---
+
+## Core Philosophy
+
+| Aspect | v4.0 (Old) | v5.0 (New) |
+|--------|------------|------------|
+| **Default Question** | "Is this feasible?" | "How do we build this?" |
+| **Default Deliverable** | REPORT | SPECIFICATION |
+| **Counterevidence** | "Find reasons this might not work" | "Find failures and extract lessons" |
+| **Completion** | Min sources met | HIGH confidence or gaps declared |
+| **Output Style** | Assessment | Implementation guidance |
 
 ---
 
 ## Features
 
-- **7-Phase Workflow**: Parse -> Discover -> Curate -> Extract -> Compile -> Synthesize -> Critique
+- **8-Phase Workflow**: Plan -> Parse -> Survey -> Deep Dive -> Failure -> Compile -> Specify -> Validate
+- **Mandatory Planning**: User-approved research plan before execution
 - **MCP-Powered Discovery**: OpenAlex (250M+ papers), arXiv (preprints), Exa (web)
 - **Full-Text Access**: Unpaywall integration for open-access papers
+- **Implementation Detail Detection**: Flag sources with code, parameters, architecture
+- **Failure Analysis**: Extract risk-mitigation pairs from failure studies
+- **Completion Gate**: Ensures HIGH confidence or explicit gaps
 - **Parallel Agents**: Discovery agents run simultaneously for speed
-- **Auto-Complexity Detection**: Presets adjust based on deliverable type
-- **Robust Confidence**: HIGH (3+ T1 sources + 2+ full-text) / LOW (1-2 sources) / CONTESTED
 - **Full Traceability**: Every claim links to sources with DOIs and tiers
 - **Resumable**: STATE.json tracks progress; continue from any checkpoint
-
-## Example Output
-
-See `research/v4-test/` for a complete v4.0 example:
-- **Topic**: Prompt Engineering Techniques
-- **Sources**: 25 curated from 31 discovered
-- **Claims**: 9 (all LOW due to quick preset)
-- **Gates**: All passed (Depth, Retraction)
-- **Output**: `synthesis/final_deliverable.md`
 
 ---
 
 ## Quick Start
 
-### 1. Create SPEC
+### 1. Create SPEC with Goal (not Question)
 
 ```bash
-mkdir -p research/my-topic
+mkdir -p research/my-project
 ```
 
-Create `research/my-topic/SPEC.md`:
+Create `research/my-project/SPEC.md`:
 
 ```markdown
-# Research Specification: My Topic
+# Research Specification: My Project
 
-## Research Question
-What are the best practices for [topic]?
+## Goal
+Build a [specific system/solution] that can [accomplish specific outcome]
+
+## Success Criteria
+- [ ] Specific method recommendations identified for each component
+- [ ] Implementation sequence with dependencies defined
+- [ ] Data requirements documented
+- [ ] Known risks paired with mitigations
 
 ## Research Units
-1. [Area 1]
-2. [Area 2]
-3. [Area 3]
+1. [Component/method area 1]
+2. [Component/method area 2]
+3. [Component/method area 3]
 
-## Deliverables
-REPORT
+## Deliverable
+SPECIFICATION
 
-## User Context
+## Context
 - Use case: [what you're building]
-- Constraints: [limits]
-- Expertise: [your background]
+- Constraints: [technical limitations]
+- Expertise: [your team's background]
+- Existing work: [what you already know]
 ```
 
 ### 2. Run Research
 
 ```
-/research my-topic
+/research my-project --thorough
 ```
 
-Or with preset:
-```
-/research my-topic --quick       # 2 sources/unit, fast
-/research my-topic --standard    # 3 sources/unit, default
-/research my-topic --thorough    # 5 sources/unit, comprehensive
-```
+### 3. Review and Approve Plan
 
-### 3. Monitor (Optional)
+The system creates `PLAN.md` first. Review the research strategy and approve before execution proceeds.
 
-```
-/research-status my-topic
-```
+### 4. Get Implementation Specification
 
-### 4. Review Results
-
-Primary outputs:
-- `synthesis/final_deliverable.md` - Main research deliverable
-- `synthesis/critique.md` - Limitations and confidence assessment
-- `claims.md` - Evidence registry with confidence levels
-- `SOURCES.md` - Curated source list with tiers
+Final output in `synthesis/final_deliverable.md`:
+- Selected methods for each component with evidence
+- Implementation sequence with dependencies
+- Data requirements
+- Risk-mitigation table from failure studies
+- Validation approach
 
 ---
 
@@ -126,72 +125,70 @@ Primary outputs:
 
 | Command | Description |
 |---------|-------------|
-| `/research {slug}` | Execute 7-phase workflow |
-| `/research {slug} --quick` | Fast mode (2 sources/unit, 2 passes) |
-| `/research {slug} --standard` | Default (3 sources/unit, 2-3 passes) |
-| `/research {slug} --thorough` | Deep (5 sources/unit, 3 passes + counterevidence) |
-| `/research-status {slug}` | Check progress and statistics |
+| `/research {slug}` | Execute 8-phase workflow |
+| `/research {slug} --quick` | Fast mode (2 sources/unit, no failure analysis) |
+| `/research {slug} --standard` | Default (3 sources/unit, failure analysis) |
+| `/research {slug} --thorough` | Deep (5 sources/unit, comprehensive) |
+| `/research-status {slug}` | Check progress and plan status |
 | `/research-resume {slug}` | Continue interrupted research |
-| `/research-validate {slug}` | Validate sources and check for retractions |
-| `/cite {DOI or title}` | Quick citation lookup and formatting |
+| `/research-validate {slug}` | Validate sources and check gates |
+| `/cite {DOI or title}` | Quick citation lookup |
 
 ---
 
 ## Presets
 
-| Preset | Sources/Unit | Passes | Counterevidence | Use When |
-|--------|--------------|--------|-----------------|----------|
-| `--quick` | 2 | 2 | No | Exploration, time-sensitive |
-| `--standard` | 3 | 2-3 | If contested | Default |
-| `--thorough` | 5 | 3 | Yes | Critical decisions |
+| Preset | Sources/Unit | Passes | Failure Analysis | Use When |
+|--------|--------------|--------|------------------|----------|
+| `--quick` | 2 | 2 | No | Exploration, simple questions |
+| `--standard` | 3 | 3 | Yes | Default for most research |
+| `--thorough` | 5 | 3 | Yes | Critical implementations |
 | `--decision-support` | 4 | 3 | Yes | VERDICT/COMPARISON |
 
 ---
 
 ## How It Works
 
+### Phase 0: Plan (NEW)
+- Analyzes user's goal statement
+- Decomposes into research questions
+- Creates research strategy document
+- **User must approve before proceeding**
+
 ### Phase 1: Parse
 - Reads SPEC.md, validates required sections
 - Auto-detects complexity and recency policy
 - Writes STATE.json with configuration
-- Creates directory structure
 
-### Phase 2: Discover
-- Spawns parallel agents (Academic + Practitioner)
-- Academic: OpenAlex + arXiv for peer-reviewed/preprints
-- Practitioner: Exa for tutorials, docs, case studies
-- Counterevidence pass (if --thorough or contested topic)
-- **NEW**: Citation snowballing for key sources
+### Phase 2: Survey
+- Spawns parallel discovery agents
+- **Implementation-focused search queries**
+- Prioritizes sources with code, parameters, architecture
 
-### Phase 3: Curate
-- Merges discovery results with enhanced deduplication
-- **NEW**: Retraction checking via Crossref
-- Filters by tier targets and relevance
-- Writes SOURCES.md with curated list
+### Phase 3: Deep Dive
+- Evidence-driven depth allocation
+- Extracts detailed implementation specifications
+- Flags sources with implementation detail
 
-### Phase 4: Extract
-- Reads top N sources per unit (based on preset)
-- **NEW**: Unpaywall integration for full-text access
-- Uses arXiv API for preprints, Firecrawl for web
-- **NEW**: Depth gate validates extraction completeness
-- Writes findings to `topics/{unit}/findings.md`
+### Phase 4: Failure Analysis (RENAMED)
+- Searches for failed implementations
+- Extracts lessons learned
+- **Creates risk-mitigation pairs**
 
 ### Phase 5: Compile
-- Builds claims registry from extracted evidence
-- **NEW**: Enhanced confidence requires 2+ full-text sources for HIGH
-- Calculates confidence: HIGH (3+ T1 + 2+ FULLTEXT) / LOW (1-2) / CONTESTED
-- Writes claims.md
+- Builds claims registry with confidence levels
+- **Enforces Completion Gate**: HIGH confidence or gaps declared
+- Compiles risk-mitigation table
 
-### Phase 6: Synthesize
-- Generates deliverable matching SPEC type
-- REPORT, VERDICT, COMPARISON, BLUEPRINT, or BIBLIOGRAPHY
-- Writes `synthesis/final_deliverable.md`
+### Phase 6: Specify
+- Generates implementation specification
+- Includes method selections with evidence
+- Documents gaps explicitly if present
 
-### Phase 7: Critique
+### Phase 7: Validate
 - Self-assesses source quality and coverage
-- **NEW**: Reports full-text vs abstract-only ratio
-- Documents limitations and what could invalidate conclusions
-- Writes `synthesis/critique.md`
+- Verifies all gates passed
+- Documents limitations
 
 ---
 
@@ -199,29 +196,28 @@ Primary outputs:
 
 ```
 research/{slug}/
-├── SPEC.md                     # Your specification (input)
-├── STATE.json                  # Workflow state and config
+├── PLAN.md                      # Research plan (requires approval)
+├── SPEC.md                      # Input specification
+├── STATE.json                   # Workflow state
 ├── discovery/
-│   ├── academic.md             # OpenAlex + arXiv results
-│   ├── practitioner.md         # Exa results
-│   ├── counterevidence.md      # Critiques (standard+ presets)
-│   ├── grey_literature.md      # BLUEPRINT only (NEW)
-│   └── snowball.md             # Citation snowballing (NEW)
-├── SOURCES.md                  # Curated source list with access tags
+│   ├── academic.md              # Academic sources
+│   ├── practitioner.md          # Practitioner sources
+│   ├── failure_analysis.md      # Failure studies (NEW name)
+│   ├── grey_literature.md       # BLUEPRINT only
+│   └── snowball.md              # Citation snowballing
+├── SOURCES.md                   # Curated source list
 ├── topics/
 │   └── {unit}/
-│       ├── findings.md         # Extracted evidence per unit
-│       └── findings_structured.json  # Structured extraction (NEW)
-├── claims.md                   # Evidence registry with gate checks
+│       ├── findings.md          # Extracted evidence
+│       └── findings_structured.json
+├── claims.md                    # Evidence registry
 ├── synthesis/
-│   ├── final_deliverable.md    # PRIMARY OUTPUT
-│   ├── critique.md             # Quality assessment
-│   └── contradictions.md       # If contested
+│   ├── final_deliverable.md     # PRIMARY OUTPUT
+│   ├── critique.md              # Quality assessment
+│   ├── risk_mitigations.md      # Compiled risk-mitigation pairs
+│   └── gaps.md                  # Explicit gaps (if any)
 └── logs/
-    ├── runlog.ndjson           # Tool execution log
-    ├── checkpoint.md           # Resume checkpoint
-    ├── dedup_log.json          # Deduplication decisions (NEW)
-    └── retraction_flags.json   # Retraction check results (NEW)
+    └── ...
 ```
 
 ---
@@ -230,11 +226,12 @@ research/{slug}/
 
 | Type | Use When | Output Format |
 |------|----------|---------------|
-| **REPORT** | "What is X?" | Findings by research unit |
-| **VERDICT** | "Which should I use?" | Recommendation + comparison matrix |
-| **COMPARISON** | "Compare A vs B" | Neutral side-by-side analysis |
-| **BLUEPRINT** | "How to design X?" | Architecture + implementation steps |
-| **BIBLIOGRAPHY** | "What sources exist?" | Annotated source list |
+| **SPECIFICATION** | "How to build X?" (DEFAULT) | Implementation blueprint |
+| **VERDICT** | "Which should I use?" | Recommendation with evidence |
+| **COMPARISON** | "Compare A vs B" | Neutral side-by-side |
+| **REPORT** | "What is X?" | Comprehensive findings |
+| **BLUEPRINT** | "How to design X?" | Architecture + standards |
+| **BIBLIOGRAPHY** | "What sources exist?" | Annotated list |
 
 ---
 
@@ -242,9 +239,19 @@ research/{slug}/
 
 | Level | Requirement | Display |
 |-------|-------------|---------|
-| **HIGH** | 3+ Tier-1/2 sources agree AND 2+ full-text accessed | Stated with confidence |
-| **LOW** | 1-2 sources only OR abstract-only extraction | Flagged as tentative |
+| **HIGH** | 3+ Tier-1/2 sources + 2+ FULLTEXT + implementation detail | Recommended with confidence |
+| **LOW** | 1-2 sources OR no implementation detail | Requires gap declaration |
 | **CONTESTED** | Sources disagree | Both positions presented |
+
+---
+
+## Gates
+
+| Gate | Purpose | Failure Action |
+|------|---------|----------------|
+| **Depth Gate (A)** | HIGH claims need FULLTEXT sources | Downgrade to LOW |
+| **Completion Gate (B)** | All recommendations need HIGH or gaps | Block synthesis |
+| **Retraction Gate (C)** | No retracted papers | Remove source |
 
 ---
 
@@ -252,11 +259,9 @@ research/{slug}/
 
 | Tier | Examples | Target |
 |------|----------|--------|
-| **1** | Peer-reviewed journals, major conferences (ACL, NeurIPS) | 70% |
-| **2** | arXiv preprints, patents, tech reports, authoritative docs | 25% |
-| **3** | Blogs, tutorials, whitepapers | 5% |
-
-*Tier targets auto-adjust for emerging fields with limited peer review.*
+| **1** | Peer-reviewed journals, major conferences | 70% |
+| **2** | arXiv preprints, patents, tech reports | 25% |
+| **3** | Expert blogs, documentation | 5% |
 
 ---
 
@@ -280,10 +285,71 @@ research/{slug}/
 
 ### Configuration
 
-See `docs/RESEARCH_SETUP.md` for:
-- MCP server configuration
-- API key setup
-- Permission/sandbox settings
+See `docs/RESEARCH_SETUP.md` for MCP server configuration.
+
+---
+
+## Example: Probability System Research
+
+### SPEC (v5.0 format)
+
+```markdown
+# Research Specification: Sports Probability System
+
+## Goal
+Build a production-grade probability system for sports betting that can
+predict single-leg probabilities, model correlations across legs, and
+optimize parlay construction for positive expected value.
+
+## Success Criteria
+- [ ] Model architecture recommendations with evidence
+- [ ] Calibration method selection
+- [ ] Correlation modeling approach
+- [ ] Validation metrics with targets
+
+## Research Units
+1. Single-leg probability models
+2. Correlation/dependence modeling
+3. Calibration methods
+4. Portfolio optimization
+
+## Deliverable
+SPECIFICATION
+
+## Context
+- Use case: Building a betting probability system
+- Constraints: Limited to public data sources
+- Expertise: Data science team with ML experience
+- Existing work: Basic ML models attempted
+```
+
+### Expected Output
+
+Instead of "feasible under narrow conditions", you get:
+
+```markdown
+# Implementation Specification: Sports Probability System
+
+## Executive Summary
+Build using gradient boosted trees for single-leg prediction,
+Vine Copulas for correlation modeling, Isotonic Regression for
+calibration, and fractional Kelly with correlation adjustment.
+
+**Confidence Level**: HIGH
+
+## Recommended Architecture
+
+### Component 1: Single-Leg Probability Engine
+**Selected Method**: XGBoost with feature engineering from play-by-play
+**Evidence Basis**: S1 (FULLTEXT), S4 (FULLTEXT), S12 (FULLTEXT)
+...
+
+## Risk-Mitigation Table
+| Risk | Mitigation | Evidence |
+|------|------------|----------|
+| Calibration drift | Weekly recalibration with holdout | S7 |
+| Overfitting to historical | Walk-forward validation | S3, S8 |
+```
 
 ---
 
@@ -291,11 +357,10 @@ See `docs/RESEARCH_SETUP.md` for:
 
 | Problem | Solution |
 |---------|----------|
-| No sources found | Broaden key terms, verify MCP servers running |
-| Extraction failing | Firecrawl rate-limited; wait and `/research-resume` |
-| Low Tier-1 percentage | Field may be too new; document as limitation |
-| Research interrupted | Use `/research-resume {slug}` to continue |
-| Retracted paper found | System auto-excludes and logs in validation/ |
+| Plan not approved | Review PLAN.md, modify if needed, then approve |
+| LOW confidence on recommendations | Check for implementation detail in sources |
+| Completion Gate failed | Document gaps explicitly |
+| No sources with implementation detail | Broaden search to include tutorials, case studies |
 
 ---
 
@@ -303,27 +368,34 @@ See `docs/RESEARCH_SETUP.md` for:
 
 | File | Content |
 |------|---------|
-| `docs/RESEARCH_SETUP.md` | MCP setup, permissions, hooks |
-| `.claude/CLAUDE.md` | System constitution (7 principles) |
+| `docs/RESEARCH_SETUP.md` | MCP setup, permissions |
+| `docs/IMPLEMENTATION_PLAN_v5.md` | v5.0 design rationale |
+| `.claude/CLAUDE.md` | System constitution |
 | `.claude/rules/research.md` | Schemas and rubrics |
 | `templates/SPEC.md` | SPEC template |
-| `research/v4-test/` | Working v4.0 example output |
+| `templates/PLAN.md` | PLAN template |
 
 ---
 
-## Comparison: Research ADE vs Standard Claude Research
+## Migration from v4.0
 
-| Aspect | Standard Mode | Research ADE |
-|--------|---------------|--------------|
-| Sources | Web search snippets | OpenAlex, arXiv, Exa, Unpaywall |
-| Full-text access | Rare | Systematic via Unpaywall |
-| Traceability | Weak | DOI, citations, tiers |
-| Confidence | Implicit | Explicit HIGH/LOW/CONTESTED |
-| Retraction checking | None | Automatic via Crossref |
-| Persistence | None | Full file structure |
-| Reproducibility | None | STATE.json + artifacts |
-| Best for | Quick questions | Rigorous research |
+### SPEC Changes
+- "Research Question" → "Goal" (use action verbs: Build, Design, Implement)
+- "Success Criteria" section is now required
+- "Prior Art Hints" section added (optional)
+
+### Deliverable Changes
+- Default is now SPECIFICATION (was REPORT)
+- SPECIFICATION is new deliverable type
+
+### Gate Changes
+- Safety Gate → Completion Gate
+- Completion Gate requires HIGH confidence or explicit gaps
+
+### File Changes
+- `counterevidence.md` → `failure_analysis.md`
+- New: `PLAN.md`, `risk_mitigations.md`, `gaps.md`
 
 ---
 
-**Version 4.0** | Enhanced with Full-Text Access, Enforcement Gates, and Citation Snowballing
+**Version 5.0** | Implementation-Focused Research with Mandatory Planning and Completion Gates

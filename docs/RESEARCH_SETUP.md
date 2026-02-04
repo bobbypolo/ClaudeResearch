@@ -1,4 +1,4 @@
-# Research ADE v4.0 - Setup Guide
+# Research ADE v5.0 - Setup Guide
 
 ## MCP Server Configuration
 
@@ -74,11 +74,30 @@ Then run the demo:
 /research demo --quick   # Or run fresh with quick preset
 ```
 
-A working demo is included at `research/demo/` showing complete output.
-
 ---
 
-## v4.0 Features Setup
+## v5.0 Features Setup
+
+### Mandatory Planning Phase (NEW)
+
+No special configuration needed. The system automatically:
+1. Creates `PLAN.md` before any discovery
+2. Presents plan to user for approval
+3. Blocks research until user approves
+
+### Failure Analysis (Replaces Counterevidence)
+
+The system searches for failed implementations and extracts lessons learned:
+- Search patterns: `{method} failed`, `{method} pitfalls`, `{method} lessons learned`
+- Output: `discovery/failure_analysis.md`
+- Risk-mitigation pairs compiled in `synthesis/risk_mitigations.md`
+
+### Completion Gate (NEW)
+
+Enforces HIGH confidence on all recommendations OR explicit gap declarations:
+- If recommendation has LOW confidence → must document gap in `synthesis/gaps.md`
+- Research does not end with "feasible under narrow conditions"
+- Either know how to do it, or document exactly what's missing
 
 ### Unpaywall Integration (Full-Text Access)
 
@@ -108,11 +127,11 @@ Uses Crossref API via `mcp__crossref__getWorkByDOI`:
 
 Based on actual workflow execution:
 
-| Preset | Agents | Duration | Sources | Snowball |
-|--------|--------|----------|---------|----------|
-| `--quick` | 2 parallel | ~2-3 min | ~15-20 | No |
-| `--standard` | 3 parallel | ~5-7 min | ~40-50 | Yes |
-| `--thorough` | 4 parallel | ~8-12 min | ~60-80 | Yes |
+| Preset | Agents | Duration | Sources | Snowball | Failure Analysis |
+|--------|--------|----------|---------|----------|------------------|
+| `--quick` | 2 parallel | ~2-3 min | ~15-20 | No | No |
+| `--standard` | 3 parallel | ~5-7 min | ~40-50 | Yes | Yes |
+| `--thorough` | 4 parallel | ~8-12 min | ~60-80 | Yes | Yes |
 
 *Duration depends on MCP server response times, snowball depth, and extraction complexity.*
 
@@ -140,41 +159,43 @@ When prompted, approve tools for the session:
 
 ---
 
-## File Structure
+## File Structure (v5.0)
 
 After running `/research {slug}`:
 
 ```
 research/{slug}/
-├── SPEC.md                     # Your input
-├── STATE.json                  # Workflow state and config
+├── PLAN.md                     # Research plan (requires approval) [NEW]
+├── SPEC.md                     # Your input (Goal, not Question)
+├── STATE.json                  # Workflow state and config (v3.0 schema)
 │
 ├── discovery/
 │   ├── academic.md             # OpenAlex + arXiv
 │   ├── practitioner.md         # Exa web sources
-│   ├── counterevidence.md      # Critiques (standard+ presets)
-│   ├── grey_literature.md      # BLUEPRINT only (v4.0)
-│   └── snowball.md             # Citation snowballing (v4.0)
+│   ├── failure_analysis.md     # Failure studies (was counterevidence)
+│   ├── grey_literature.md      # BLUEPRINT only
+│   └── snowball.md             # Citation snowballing
 │
 ├── SOURCES.md                  # Curated list with access tags
 │
 ├── topics/
 │   └── {unit}/
-│       ├── findings.md         # Extracted evidence
-│       └── findings_structured.json  # Structured data (v4.0)
+│       ├── findings.md         # Extracted evidence (12 fields)
+│       └── findings_structured.json  # Structured data
 │
 ├── claims.md                   # Evidence registry with gate checks
 │
 ├── synthesis/
 │   ├── final_deliverable.md    # PRIMARY OUTPUT
-│   ├── critique.md             # Limitations
-│   └── contradictions.md       # If contested
+│   ├── critique.md             # Limitations + gate compliance
+│   ├── risk_mitigations.md     # Compiled risk-mitigation pairs [NEW]
+│   └── gaps.md                 # Gap declarations (if any) [NEW]
 │
 └── logs/
     ├── runlog.ndjson           # Tool execution log
     ├── checkpoint.md           # Resume checkpoint
-    ├── dedup_log.json          # Deduplication decisions (v4.0)
-    └── retraction_flags.json   # Retraction check results (v4.0)
+    ├── dedup_log.json          # Deduplication decisions
+    └── retraction_flags.json   # Retraction check results
 ```
 
 ---
@@ -218,23 +239,19 @@ Resume from last checkpoint:
 
 STATE.json tracks current phase; workflow continues from there.
 
----
+### "Plan not approved"
 
-## Example: Demo Output
+Research cannot proceed until user approves the plan:
+1. Review `PLAN.md` for accuracy
+2. Modify if needed
+3. Run `/research {slug}` again and approve
 
-The included `research/demo/` contains a complete example:
+### "Completion Gate failed"
 
-| File | Content |
-|------|---------|
-| `SPEC.md` | RAG Fundamentals research spec |
-| `STATE.json` | Preset: standard, 3 units |
-| `discovery/academic.md` | 25 sources from OpenAlex/arXiv |
-| `discovery/practitioner.md` | 26 sources from Exa |
-| `SOURCES.md` | 15 curated sources |
-| `topics/*/findings.md` | Extracted evidence |
-| `claims.md` | 14 claims (10 HIGH, 4 LOW) |
-| `synthesis/final_deliverable.md` | REPORT deliverable |
-| `synthesis/critique.md` | Quality assessment |
+LOW confidence recommendations need gap declarations:
+1. Check which claims have LOW confidence in `claims.md`
+2. Document gaps in `synthesis/gaps.md`
+3. Run `/research-validate {slug}` to verify
 
 ---
 
@@ -242,9 +259,9 @@ The included `research/demo/` contains a complete example:
 
 | Command | Description |
 |---------|-------------|
-| `/research {slug}` | Execute full 7-phase workflow |
-| `/research {slug} --quick` | Fast mode (2 sources/unit) |
-| `/research {slug} --standard` | Default (3 sources/unit + snowball) |
+| `/research {slug}` | Execute full 8-phase workflow |
+| `/research {slug} --quick` | Fast mode (2 sources/unit, no failure analysis) |
+| `/research {slug} --standard` | Default (3 sources/unit + failure analysis) |
 | `/research {slug} --thorough` | Deep (5 sources/unit + all gates) |
 | `/research-status {slug}` | Check progress and statistics |
 | `/research-resume {slug}` | Continue interrupted research |
@@ -253,13 +270,13 @@ The included `research/demo/` contains a complete example:
 
 ---
 
-## Version 4.0
+## Version 5.0
 
-Enhanced from v3.0 with:
-- Full-text access via Unpaywall integration
-- Citation snowballing (forward + backward)
-- Enforcement gates (Depth, Safety, Retraction)
-- Structured data extraction for VERDICT/COMPARISON
-- Grey literature pass for BLUEPRINT
-- Domain-aware recency policies
-- Enhanced deduplication pipeline
+Enhanced from v4.0 with:
+- **Mandatory planning phase** - User approves research plan before execution
+- **Optimistic-empirical posture** - "Solutions exist until proven otherwise"
+- **Failure analysis** - Extracts lessons from failed implementations
+- **Risk-mitigation pairs** - Every risk paired with evidence-based mitigation
+- **Completion Gate** - HIGH confidence required or explicit gaps declared
+- **SPECIFICATION deliverable** - Implementation-focused output (new default)
+- **8-phase workflow** - Plan → Parse → Survey → Deep Dive → Failure → Compile → Specify → Validate

@@ -1,12 +1,12 @@
 ---
 name: research
-description: Execute autonomous research with 7-phase workflow including gates, snowballing, and full-text access
+description: Execute autonomous research with 8-phase workflow including planning, failure analysis, and implementation specifications
 user_prompt: true
 ---
 
 # /research {slug} [--quick|--standard|--thorough|--decision-support]
 
-Execute a comprehensive, autonomous research workflow that produces high-quality output through 7 systematic phases.
+Execute a comprehensive, autonomous research workflow that produces implementation-ready specifications through 8 systematic phases.
 
 ## INVOCATION
 
@@ -19,9 +19,99 @@ The user provides a research slug and optional preset:
 | Preset | Min Sources/Unit | Extraction Depth | Passes | Use When |
 |--------|------------------|------------------|--------|----------|
 | `--quick` | 2 | light | 2 | Time-sensitive, exploration |
-| `--standard` | 3 | medium | 3 | Default (counterevidence required) |
+| `--standard` | 3 | medium | 3 | Default (failure analysis required) |
 | `--thorough` | 5 | deep | 3 | Critical decisions, publications |
 | `--decision-support` | 4 | deep | 3 | VERDICT/COMPARISON deliverables |
+
+---
+
+## PHASE 0: PLAN (MANDATORY)
+
+**Objective**: Create comprehensive research plan before any discovery. User must approve.
+
+### Instructions
+
+1. Read `research/{slug}/SPEC.md` using the Read tool
+2. If SPEC.md doesn't exist: STOP and inform user to create it first
+
+3. **Analyze the SPEC and create research plan**:
+   - Understand the user's Goal (NOT "Research Question" - v5.0 uses "Goal")
+   - Decompose into research questions per unit
+   - Identify implementation-focused search strategies
+   - Define what HIGH confidence looks like for each unit
+   - Anticipate sub-domains that may need investigation
+
+4. **Write PLAN.md**:
+
+```markdown
+# Research Plan: {slug}
+
+## Goal Understanding
+{Restate user's goal in implementation terms}
+
+## Success Criteria
+- [ ] {What HIGH confidence looks like for each unit}
+
+## Research Strategy
+
+### Unit 1: {name}
+**Question**: How do we {specific aspect}?
+**Search Strategy**:
+- Primary: "{term} implementation" "{term} method"
+- Secondary: "{term} architecture" "{term} design"
+- Failure: "{term} failed" "{term} pitfalls" "{term} lessons learned"
+**Expected Sources**: {type of papers/reports}
+**Success Indicator**: {what finding HIGH confidence looks like}
+
+### Unit 2: {name}
+...
+
+## Anticipated Sub-Domains
+{Domains that may require investigation}
+
+## Key Search Terms
+| Concept | Primary Terms | Variants |
+|---------|---------------|----------|
+
+## Estimated Scope
+- Expected sources: {range}
+- Research units: {count}
+- Complexity: {preset}
+
+## Approval Checkpoint
+[ ] User approves plan before proceeding
+```
+
+Write to `research/{slug}/PLAN.md`
+
+5. **STOP AND PRESENT PLAN TO USER**
+
+```
+## Research Plan Created: {slug}
+
+I've created a research plan based on your SPEC.
+
+### Goal
+{restated goal}
+
+### Research Units
+1. {unit 1}
+2. {unit 2}
+3. {unit 3}
+
+### Search Strategy
+{brief summary}
+
+### Estimated Scope
+- Preset: {preset}
+- Expected sources: {range}
+
+**Please review `research/{slug}/PLAN.md` and confirm to proceed.**
+
+Do you approve this research plan?
+```
+
+**CRITICAL**: Do NOT proceed to Phase 1 until user explicitly approves.
 
 ---
 
@@ -31,33 +121,32 @@ The user provides a research slug and optional preset:
 
 ### Instructions
 
-1. Read `research/{slug}/SPEC.md` using the Read tool
-2. If SPEC.md doesn't exist: STOP and inform user to create it first
+1. Confirm user has approved the plan from Phase 0
+2. Read `research/{slug}/SPEC.md` using the Read tool
 3. Extract and validate required elements:
 
 ```
-REQUIRED:
-- Research Question: [Primary question to answer]
+REQUIRED (v5.0 format):
+- Goal: [What to build/implement - NOT a question]
+- Success Criteria: [What HIGH confidence looks like]
 - Research Units: [1-5 focused areas]
-- Deliverables: VERDICT | REPORT | COMPARISON | BLUEPRINT | BIBLIOGRAPHY
-- User Context: [Use case, constraints, expertise]
+- Deliverable: SPECIFICATION | VERDICT | REPORT | COMPARISON | BLUEPRINT | BIBLIOGRAPHY
+- Context: [Use case, constraints, expertise, existing work]
 
-OPTIONAL (defaults apply):
-- Constraints: [Default: based on recency_policy]
+OPTIONAL:
+- Prior Art Hints: [Known starting points]
+- Constraints: [Time period, excluded sources]
 - Key Search Terms: [Auto-generate if missing]
-- Preset: [Auto-detect if not specified]
+- Recency Policy: [fast_moving | scientific | historical]
 ```
 
-4. **Auto-Complexity Detection** - Determine:
+4. **Auto-Complexity Detection**:
 
 ```javascript
-// Derive from SPEC content
 preset = args.preset || detectPreset(spec)
-contested_flag = isContested(spec) // true if VERDICT/COMPARISON or "vs/compare/which/should" phrasing
 min_sources_per_unit = preset === 'quick' ? 2 : preset === 'thorough' ? 5 : preset === 'decision-support' ? 4 : 3
 extraction_depth = preset === 'quick' ? 'light' : ['thorough', 'decision-support'].includes(preset) ? 'deep' : 'medium'
 
-// Relax tier targets if academic sources likely scarce
 tier_targets = {
   academic: spec.includesIndustryTopics ? 50 : 70,
   practitioner: spec.includesIndustryTopics ? 40 : 25,
@@ -68,60 +157,49 @@ tier_targets = {
 5. **Recency Policy Detection**:
 
 ```javascript
-// Detect domain from research question and units
 recency_policy = detectRecencyPolicy(spec)
 // Returns: 'fast_moving' | 'scientific' | 'historical'
 
-// Apply time constraints
 max_age_years = {
-  'fast_moving': 1.5,    // 18 months - LLMs, emerging tech
-  'scientific': 5,        // 5 years - established research
+  'fast_moving': 1.5,    // 18 months
+  'scientific': 5,        // 5 years
   'historical': null      // No limit
 }[recency_policy]
-
-// Indicators for fast_moving:
-// - Keywords: LLM, GPT, transformer, crypto, blockchain, generative AI
-// - Phrases: "latest", "current state", "recent advances"
-
-// Indicators for historical:
-// - Keywords: philosophy, history, classical, foundational
-// - Phrases: "origins of", "historical analysis"
 ```
 
-6. **Generate Key Terms** (if not provided):
-   - Extract technical terms from Research Question
-   - Include synonyms and variants
-   - Add negation terms if contested_flag
-
-7. **Write STATE.json**:
+6. **Write STATE.json** (v3.0 schema):
 
 ```json
 {
-  "version": "2.0",
+  "version": "3.0",
   "slug": "{slug}",
   "preset": "standard",
-  "contested_flag": false,
+  "posture": "optimistic-empirical",
   "min_sources_per_unit": 3,
   "extraction_depth": "medium",
   "tier_targets": { "academic": 70, "practitioner": 25, "other": 5 },
   "research_units": ["unit1", "unit2", "unit3"],
-  "deliverable": "REPORT",
+  "deliverable": "SPECIFICATION",
   "phase": "parse",
   "started_at": "2024-01-01T00:00:00Z",
+  "completed_at": null,
+  "plan_approved": true,
   "config": {
     "recency_policy": "scientific",
     "max_age_years": 5,
+    "foundational_exception": true,
     "snowball": {
       "enabled": true,
       "max_seeds_per_unit": 5,
       "max_snowball_sources": 10
     },
     "grey_literature": false,
-    "structured_extraction": false
+    "structured_extraction": true,
+    "failure_analysis": true
   },
   "gates": {
     "depth_gate": { "required_fulltext": 2, "status": "pending" },
-    "safety_gate": { "counterevidence_required": true, "status": "pending" },
+    "completion_gate": { "requires_high_confidence": true, "status": "pending", "gaps_declared": [] },
     "retraction_gate": { "status": "pending" }
   },
   "statistics": {
@@ -131,16 +209,22 @@ max_age_years = {
     "abstract_only": 0,
     "paywalled": 0,
     "retractions_found": 0,
-    "snowball_added": 0
+    "snowball_added": 0,
+    "failure_studies_found": 0,
+    "risk_mitigation_pairs": 0
+  },
+  "confidence_tracking": {
+    "high_confidence_claims": 0,
+    "low_confidence_claims": 0,
+    "gaps_requiring_research": []
   }
 }
 ```
 
-Write to `research/{slug}/STATE.json`
-
-8. Create directory structure:
+7. Create directory structure:
 ```
 research/{slug}/
+├── PLAN.md
 ├── SPEC.md
 ├── STATE.json
 ├── discovery/
@@ -154,36 +238,39 @@ research/{slug}/
 
 ---
 
-## PHASE 2: DISCOVER
+## PHASE 2: SURVEY
 
-**Objective**: Find sources using multi-pass strategy with snowball expansion.
+**Objective**: Broad discovery focused on implementation approaches.
 
-### Discovery Strategy
+### Discovery Strategy (v5.0 - Implementation-Focused)
 
 | Pass | When to Run | Purpose | Target |
 |------|-------------|---------|--------|
 | **Academic** | Always | Peer-reviewed, arXiv, theses | 60% |
-| **Practitioner** | If BLUEPRINT/VERDICT OR preset >= standard | Case studies, docs | 30% |
-| **Counterevidence** | Always for preset >= standard (Safety Gate) | Critiques, failures | 10% |
+| **Practitioner** | SPECIFICATION/BLUEPRINT/VERDICT OR preset >= standard | Case studies, docs | 30% |
+| **Failure Analysis** | Always for preset >= standard (Completion Gate) | Failed implementations, lessons learned | 10% |
 | **Grey Literature** | If deliverable == BLUEPRINT | NIST, RAND, standards | 10% |
 | **Snowball** | After keyword search, if preset >= standard | Citation expansion | +10 max |
 
-### Stop Conditions
-- Cap candidates at **12 per research unit** (before snowball)
-- Stop early once `min_sources_per_unit` met with acceptable tiers
-- Apply recency_policy filter from STATE.json
+### Search Strategy (v5.0 - "How to build" focus)
+
+```
+Primary queries:
+- "{goal} implementation" "{goal} system design" "{goal} method"
+- "{goal} architecture" "{goal} pipeline" "{goal} algorithm"
+
+Secondary queries:
+- "{goal} best practices" "{goal} state of the art"
+- "{goal} comparison benchmark"
+
+Failure queries:
+- "{method} failed" "{method} failure" "{method} pitfalls"
+- "{method} lessons learned" "{method} postmortem"
+```
 
 ### Instructions
 
-Read `research/{slug}/STATE.json` to determine:
-- Which passes to run (2-4)
-- min_sources_per_unit target
-- tier_targets for quality filtering
-- recency_policy and max_age_years
-- snowball settings
-- grey_literature flag
-
-Create directory: `research/{slug}/discovery/`
+Read `research/{slug}/STATE.json` to determine passes to run.
 
 **SPAWN AGENT 1: Academic Discovery**
 
@@ -191,7 +278,7 @@ Create directory: `research/{slug}/discovery/`
 TaskCreate:
   subject: "Academic Discovery for {slug}"
   description: |
-    You are an Academic Discovery Agent. Find peer-reviewed and preprint sources.
+    You are an Academic Discovery Agent. Find implementation-focused sources.
 
     CONTEXT:
     - Slug: {slug}
@@ -200,328 +287,178 @@ TaskCreate:
     - Min per unit: {min_sources_per_unit}
     - Max per unit: 12
     - Recency Policy: {recency_policy}
-    - Max Age: {max_age_years} years (null = no limit)
 
     TOOLS:
     1. ToolSearch "+openalex search" → mcp__openalex__search_works
     2. ToolSearch "+arxiv" → mcp__arxiv__search_papers
-    3. ToolSearch "+crossref" → mcp__crossref__searchByTitle
 
-    SEARCH STRATEGY:
-    - Search each research unit with key terms
-    - Prioritize: systematic reviews, highly cited, recent
-    - Apply recency filter (except foundational/seminal papers)
-    - Stop when min reached OR 12 candidates found per unit
-    - CAPTURE DOIs for all sources (needed for dedup and full-text)
+    SEARCH STRATEGY (Implementation-focused):
+    - Prioritize: papers with methods sections, reproducibility, code
+    - Search: "{term} implementation" "{term} method" "{term} system"
+    - Look for: benchmark results, parameter tables, architecture diagrams
+    - Flag sources that have implementation detail
 
     OUTPUT FORMAT (write to research/{slug}/discovery/academic.md):
-    ```
     # Academic Discovery Results
 
     ## {Research Unit 1}
-    | # | Title | Authors | Year | Type | DOI | Citations | Relevance |
-    |---|-------|---------|------|------|-----|-----------|-----------|
-    | 1 | ... | ... | 2024 | Journal | 10.xxx | 45 | HIGH |
-
-    ## {Research Unit 2}
-    ...
+    | # | Title | Authors | Year | Type | DOI | Citations | Has Impl Detail | Relevance |
+    |---|-------|---------|------|------|-----|-----------|-----------------|-----------|
 
     ## Search Log
     - Query: "..." → N results
-    - Recency filter applied: {max_age_years} years
-    ```
   activeForm: "Discovering academic sources"
 ```
 
 **SPAWN AGENT 2: Practitioner Discovery** (if needed)
 
-Only spawn if: `deliverable in ['BLUEPRINT', 'VERDICT'] OR preset in ['standard', 'thorough', 'decision-support']`
+Only spawn if: `deliverable in ['SPECIFICATION', 'BLUEPRINT', 'VERDICT'] OR preset in ['standard', 'thorough', 'decision-support']`
+
+**SPAWN AGENT 3: Failure Analysis Discovery** (REQUIRED for standard+)
+
+Spawn if: `preset in ['standard', 'thorough', 'decision-support']`
 
 ```
 TaskCreate:
-  subject: "Practitioner Discovery for {slug}"
+  subject: "Failure Analysis Discovery for {slug}"
   description: |
-    You are a Practitioner Discovery Agent. Find implementation guides and case studies.
+    You are a Failure Analysis Agent. Find implementations that failed and extract lessons.
+
+    IMPORTANT: This is REQUIRED by Completion Gate for standard+ presets.
 
     CONTEXT: {same as above}
 
-    TOOLS:
-    1. ToolSearch "+exa" → mcp__exa__web_search_exa
+    QUERY PATTERNS (find failures and lessons):
+    - "{method} failed" "{method} failure analysis"
+    - "{method} pitfalls" "{method} mistakes"
+    - "{method} lessons learned" "{method} postmortem"
+    - "{domain} what went wrong" "{domain} debugging"
 
-    SEARCH STRATEGY:
-    - Focus on: tutorials, documentation, case studies, engineering blogs
-    - Filter for authoritative domains: .edu, .gov, major tech companies
-    - Look for practical implementation details
-    - Apply recency filter
+    FOR EACH FAILURE FOUND, EXTRACT:
+    - What method was attempted
+    - What failed and why
+    - Lessons learned
+    - Risk-mitigation pair
 
-    OUTPUT: Write to research/{slug}/discovery/practitioner.md
-  activeForm: "Discovering practitioner sources"
+    OUTPUT: Write to research/{slug}/discovery/failure_analysis.md
+  activeForm: "Discovering failure studies"
 ```
 
-**SPAWN AGENT 3: Counterevidence Discovery** (REQUIRED for standard+)
+**SPAWN AGENT 4: Grey Literature** (BLUEPRINT only)
 
-Spawn if: `preset in ['standard', 'thorough', 'decision-support']` (Safety Gate B enforcement)
-
-```
-TaskCreate:
-  subject: "Counterevidence Discovery for {slug}"
-  description: |
-    You are a Counterevidence Discovery Agent. Find critiques and limitations.
-
-    IMPORTANT: This is REQUIRED by Safety Gate B for standard+ presets.
-
-    CONTEXT: {same as above}
-
-    QUERY PATTERNS:
-    - "{term}" limitations challenges problems
-    - "{term}" failed failure postmortem
-    - "{term}" criticism critique
-    - "{term}" why not alternative
-    - "{term}" does not work
-
-    TOOLS: Same as Practitioner agent
-
-    OUTPUT: Write to research/{slug}/discovery/counterevidence.md
-  activeForm: "Discovering counterevidence"
-```
-
-**SPAWN AGENT 4: Grey Literature Discovery** (BLUEPRINT only)
-
-Only spawn if: `deliverable == 'BLUEPRINT'`
-
-```
-TaskCreate:
-  subject: "Grey Literature Discovery for {slug}"
-  description: |
-    You are a Grey Literature Discovery Agent. Find standards and government reports.
-
-    CONTEXT: {same as above}
-
-    TARGET SOURCES:
-    - NIST publications (csrc.nist.gov, nvd.nist.gov)
-    - RAND Corporation (rand.org)
-    - Standards bodies: IEEE, ISO, W3C, IETF RFCs
-    - Government technical reports (.gov domains)
-    - Major vendor architecture guides (AWS, Google, Microsoft whitepapers)
-
-    SEARCH STRATEGY:
-    - site:nist.gov "{term}"
-    - site:rand.org "{term}"
-    - "{term}" standard specification RFC
-
-    TOOLS:
-    1. ToolSearch "+exa" → mcp__exa__web_search_exa
-
-    OUTPUT: Write to research/{slug}/discovery/grey_literature.md
-  activeForm: "Discovering grey literature"
-```
-
-Wait for all discovery agents to complete.
-
-**SNOWBALL EXPANSION** (if enabled in STATE.json)
-
-After keyword discovery completes:
-
-```
-TaskCreate:
-  subject: "Citation Snowball for {slug}"
-  description: |
-    You are a Citation Snowball Agent. Expand sources via citation networks.
-
-    CONTEXT:
-    - Slug: {slug}
-    - Max seeds per unit: {config.snowball.max_seeds_per_unit}
-    - Max snowball sources: {config.snowball.max_snowball_sources}
-    - Recency Policy: {recency_policy}
-
-    PROCESS:
-    1. Read research/{slug}/discovery/academic.md
-    2. Select top {max_seeds_per_unit} most-cited papers per unit as seeds
-    3. For each seed with DOI:
-       a. BACKWARD: ToolSearch "+openalex references" → mcp__openalex__get_work_references
-       b. FORWARD: ToolSearch "+openalex citations" → mcp__openalex__get_work_citations
-    4. Filter results by recency policy
-    5. Deduplicate against existing sources
-    6. Select top {max_snowball_sources} most relevant additions
-
-    OUTPUT FORMAT (write to research/{slug}/discovery/snowball.md):
-    ```
-    # Citation Snowball Results
-
-    ## Seeds Used
-    | Unit | Seed Title | DOI | Backward Found | Forward Found |
-    |------|------------|-----|----------------|---------------|
-
-    ## New Sources (Backward - References)
-    | # | Title | Authors | Year | DOI | Found Via |
-    |---|-------|---------|------|-----|-----------|
-
-    ## New Sources (Forward - Citing)
-    | # | Title | Authors | Year | DOI | Found Via |
-    |---|-------|---------|------|-----|-----------|
-
-    ## Duplicates Filtered
-    - {title} - already in academic.md
-    ```
-  activeForm: "Expanding via citation snowball"
-```
+**SNOWBALL EXPANSION** (if enabled)
 
 ---
 
-## PHASE 3: CURATE
+## PHASE 3: DEEP DIVE
 
-**Objective**: Merge, deduplicate, check retractions, resolve full-text access.
+**Objective**: Evidence-driven depth allocation with implementation detail focus.
 
 ### Instructions
 
 1. Read all discovery files from `research/{slug}/discovery/`
-2. Read `research/{slug}/STATE.json` for tier_targets and gates
+2. Read `research/{slug}/STATE.json`
 
-3. **Deduplication Pipeline**:
+3. **Identify promising implementation sources**:
+   - Flag sources with implementation detail (code, params, architecture)
+   - Prioritize FULLTEXT sources for deep extraction
+   - Allocate more depth to units with strong implementation papers
 
+4. **Deduplication Pipeline**:
 ```javascript
-// Generate canonical key
 function canonicalKey(source) {
-  if (source.doi) {
-    return `doi:${source.doi.toLowerCase()}`
-  }
-  // Fingerprint: normalized title + first author last name + year
+  if (source.doi) return `doi:${source.doi.toLowerCase()}`
   const titleNorm = source.title.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 50)
   const authorLast = source.authors[0]?.split(' ').pop()?.toLowerCase() || 'unknown'
   return `fp:${titleNorm}|${authorLast}|${source.year}`
 }
-
-// Merge rules when duplicates found:
-// 1. Keep peer-reviewed over preprint over web
-// 2. Keep version with DOI over version without
-// 3. Keep version with better metadata
 ```
 
-Write deduplication decisions to `research/{slug}/logs/dedup_log.json`:
-```json
-{
-  "timestamp": "2024-01-01T00:00:00Z",
-  "total_before": 45,
-  "total_after": 32,
-  "merges": [
-    {
-      "canonical_key": "doi:10.1234/example",
-      "kept": { "title": "...", "source": "academic.md", "reason": "peer-reviewed" },
-      "dropped": [{ "title": "...", "source": "practitioner.md", "reason": "preprint duplicate" }]
-    }
-  ]
-}
-```
+5. **Retraction Check** (Gate C)
 
-4. **Retraction Check** (Gate C):
+6. **Full-Text Resolution** (Unpaywall)
 
-For each source with DOI:
-```
-Use mcp__crossref__getWorkByDOI to check metadata
-Look for: "update-to" field with type "retraction"
-```
-
-Write to `research/{slug}/logs/retraction_flags.json`:
-```json
-{
-  "timestamp": "2024-01-01T00:00:00Z",
-  "checked": 25,
-  "retractions_found": [
-    { "doi": "10.xxx", "title": "...", "retraction_date": "2023-06-01" }
-  ],
-  "gate_status": "passed"
-}
-```
-
-**REMOVE retracted papers from source list.**
-
-5. **Full-Text Resolution** (Unpaywall):
-
-For each source with DOI, attempt full-text resolution:
-
-```
-WebFetch:
-  url: https://api.unpaywall.org/v2/{doi}?email=research@example.com
-  prompt: "Extract: is_oa (boolean), best_oa_location.url, best_oa_location.url_for_pdf"
-```
-
-Assign access depth tags:
-- **FULLTEXT**: `is_oa == true` AND OA URL accessible
-- **ABSTRACT_ONLY**: No OA version, but abstract available
-- **PAYWALLED**: No accessible version found
-
-For arXiv papers: Use `mcp__arxiv__read_paper` for full text.
-
-6. **Quality Filtering**:
-   - Apply tier_targets from STATE.json
-   - Remove sources below relevance threshold
-   - Ensure minimum coverage per research unit
-   - Track access_depth statistics
-
-7. **Write SOURCES.md**:
+7. **Write SOURCES.md** with implementation detail flags:
 
 ```markdown
 # Sources: {slug}
 
 ## Summary
 - Total: N sources
-- Academic: N% | Practitioner: N% | Other: N%
-- Per unit: {unit1: N, unit2: N, ...}
+- With implementation detail: N
 - Access: FULLTEXT: N | ABSTRACT_ONLY: N | PAYWALLED: N
-- Retractions removed: N
 
 ## By Research Unit
 
 ### {Unit 1}
-| # | Title | Type | Year | DOI | Access | Tier |
-|---|-------|------|------|-----|--------|------|
-| S1 | ... | ACADEMIC | 2024 | 10.xxx | FULLTEXT | 1 |
-| S2 | ... | ACADEMIC | 2023 | 10.yyy | ABSTRACT_ONLY | 1 |
-
-### {Unit 2}
-...
-
-## Filtered (excluded)
-| Title | Reason |
-|-------|--------|
-| ... | Low relevance |
-| ... | Retracted |
-| ... | Duplicate of S3 |
+| # | Title | Type | Year | DOI | Access | Impl Detail | Tier |
+|---|-------|------|------|-----|--------|-------------|------|
+| S1 | ... | ACADEMIC | 2024 | 10.xxx | FULLTEXT | YES | 1 |
 ```
 
-Write to `research/{slug}/SOURCES.md`
+---
 
-8. **Update STATE.json statistics**:
+## PHASE 4: FAILURE
+
+**Objective**: Extract risk-mitigation pairs from failure studies.
+
+### Instructions
+
+1. Read `research/{slug}/discovery/failure_analysis.md`
+2. For each failure study found, extract:
+
+```markdown
+## Failure Study: {source}
+
+### Context
+- **Method Attempted**: {specific approach}
+- **Domain**: {application area}
+- **Scale**: {size/scope}
+
+### Failure Description
+- **What Failed**: {observable failure}
+- **Root Cause**: {why it failed}
+- **When Discovered**: {development/testing/production}
+
+### Lessons Learned
+1. {lesson 1}
+2. {lesson 2}
+
+### Risk-Mitigation Pair
+| Risk | Likelihood | Impact | Mitigation | Evidence |
+|------|------------|--------|------------|----------|
+| {risk} | H/M/L | H/M/L | {mitigation} | {source} |
+```
+
+3. **Compile aggregated risk-mitigation table**:
+
+Write to `research/{slug}/synthesis/risk_mitigations.md`:
+
+```markdown
+# Risk-Mitigation Summary: {slug}
+
+| # | Risk | Category | Likelihood | Impact | Mitigation | Evidence |
+|---|------|----------|------------|--------|------------|----------|
+| R1 | {risk} | {data/model/system} | H/M/L | H/M/L | {mitigation} | S3, S7 |
+```
+
+4. Update STATE.json statistics:
 ```json
 {
   "statistics": {
-    "sources_found": 45,
-    "sources_deduplicated": 32,
-    "fulltext_resolved": 18,
-    "abstract_only": 10,
-    "paywalled": 4,
-    "retractions_found": 1
-  },
-  "gates": {
-    "retraction_gate": { "status": "passed", "removed": 1 }
+    "failure_studies_found": N,
+    "risk_mitigation_pairs": N
   }
 }
 ```
 
 ---
 
-## PHASE 4: EXTRACT
+## PHASE 5: COMPILE
 
-**Objective**: Extract essential information with depth tagging and structured extraction.
+**Objective**: Build claims registry, enforce gates, ensure HIGH confidence or document gaps.
 
-### Extraction Rules
-
-Read `research/{slug}/STATE.json` for extraction_depth:
-- **light** (quick): Extract top 2 per unit
-- **medium** (standard): Extract top 3 per unit
-- **deep** (thorough): Extract top 5 per unit
-
-### Extraction Template (11 Fields)
+### Extraction Template (12 Fields - v5.0)
 
 ```markdown
 ## Source: {title}
@@ -530,133 +467,20 @@ Read `research/{slug}/STATE.json` for extraction_depth:
 - **Type**: ACADEMIC | PRACTITIONER | OTHER
 - **Tier**: 1 | 2 | 3
 - **Extraction depth**: FULLTEXT | ABSTRACT_ONLY | PAYWALLED
-- **Source URL**: {accessible URL - OA link or original}
-- **Sections extracted**: {e.g., "Abstract, Methods, Results, Discussion"}
+- **Has implementation detail**: YES | NO
+- **Source URL**: {accessible URL}
+- **Sections extracted**: {e.g., "Abstract, Methods, Results"}
 - **Main claim**: {one sentence}
-- **Key evidence**: "{quote or data point}" (p. X / Section Y)
-- **Limitations**: {what this source doesn't cover or gets wrong}
-- **Relevance**: {which research unit}
-- **Notes**: {optional additional context}
+- **Key evidence**: "{quote}" (location)
+- **Implementation specifics**: {methods, parameters if present}
+- **Limitations**: {caveats}
+- **Relevance**: {unit}
 ```
 
-### Instructions
-
-1. Read `research/{slug}/SOURCES.md`
-2. For each research unit, select top N sources based on extraction_depth
-3. **Prioritize FULLTEXT sources** for extraction
-
-4. Spawn extraction agents (batch 3-4 sources each):
-
-```
-TaskCreate:
-  subject: "Extract Batch {N} for {slug}"
-  description: |
-    Extract evidence from these sources using the extraction template.
-
-    SOURCES:
-    {list with URLs and access tags}
-
-    TOOLS:
-    1. ToolSearch "+firecrawl" → mcp__firecrawl__firecrawl_scrape
-    2. For arXiv: ToolSearch "+arxiv read" → mcp__arxiv__read_paper
-    3. For OA PDFs: Use Firecrawl on the OA URL
-
-    TEMPLATE (per source - 11 fields):
-    - Citation: {full}
-    - Type: ACADEMIC | PRACTITIONER | OTHER
-    - Tier: 1 | 2 | 3
-    - Extraction depth: FULLTEXT | ABSTRACT_ONLY | PAYWALLED
-    - Source URL: {accessible URL}
-    - Sections extracted: {list sections you could access}
-    - Main claim: {one sentence}
-    - Key evidence: "{quote}" (location)
-    - Limitations: {caveats}
-    - Relevance: {unit}
-    - Notes: {optional}
-
-    RULES:
-    - For FULLTEXT: Extract from Methods, Results, Discussion
-    - For ABSTRACT_ONLY: Note limitation, extract what's available
-    - Track which sections you actually accessed
-    - For paywalled: Try OA URL from SOURCES.md first
-
-    OUTPUT: Write to research/{slug}/topics/{unit_slug}/findings.md
-  activeForm: "Extracting from batch {N}"
-```
-
-5. **Structured Extraction** (VERDICT/COMPARISON only):
-
-If `STATE.json.config.structured_extraction == true`:
-
-```
-TaskCreate:
-  subject: "Structured Extraction for {slug}"
-  description: |
-    Extract structured data for comparison/verdict synthesis.
-
-    CONTEXT:
-    - Deliverable: {VERDICT or COMPARISON}
-    - Research Units: {units}
-
-    FOR EACH SOURCE, EXTRACT:
-
-    1. benchmark_results (if present):
-       - metric: {name of metric}
-       - value: {numeric value}
-       - dataset: {benchmark dataset name}
-       - conditions: {any qualifiers}
-
-    2. statistical_claims (if present):
-       - claim: {the statistical statement, e.g., "p < 0.01"}
-       - context: {what was being compared}
-       - sample_size: {if mentioned}
-
-    3. comparisons (if present):
-       - item_a: {first thing compared}
-       - item_b: {second thing compared}
-       - dimension: {what dimension - speed, accuracy, cost, etc.}
-       - winner: {which performed better, or "tie"}
-       - margin: {quantified difference if available}
-
-    OUTPUT FORMAT (write to research/{slug}/topics/{unit}/findings_structured.json):
-    ```json
-    {
-      "unit": "{unit}",
-      "extractions": [
-        {
-          "source_id": "S1",
-          "benchmark_results": [...],
-          "statistical_claims": [...],
-          "comparisons": [...]
-        }
-      ]
-    }
-    ```
-  activeForm: "Extracting structured data"
-```
-
-6. Wait for all extraction agents to complete
-
----
-
-## PHASE 5: COMPILE
-
-**Objective**: Build claims registry with gate enforcement.
-
-### Instructions
-
-1. Read all findings files from `research/{slug}/topics/*/findings.md`
-2. Read structured extractions if present: `research/{slug}/topics/*/findings_structured.json`
-
-3. **Build Claims Registry**:
-   - Group related claims by theme
-   - Calculate confidence for each claim
-   - Track access depth of supporting sources
-
-4. **Confidence Calculation with Depth Gate**:
+### Confidence Calculation (v5.0 with implementation detail)
 
 ```javascript
-function calculateConfidence(sources) {
+function calculateConfidence(sources, claimType) {
   const agree = sources.filter(s => s.supports_claim)
   const disagree = sources.filter(s => s.contradicts_claim)
 
@@ -665,276 +489,173 @@ function calculateConfidence(sources) {
   }
 
   const tier1or2 = agree.filter(s => s.tier <= 2)
-  const fulltext = agree.filter(s => s.extraction_depth === 'FULLTEXT')
   const fulltextTier1or2 = tier1or2.filter(s => s.extraction_depth === 'FULLTEXT')
 
-  // Gate A: HIGH requires >= 2 FULLTEXT from Tier 1/2
-  if (tier1or2.length >= 3 && fulltextTier1or2.length >= 2) {
-    return 'HIGH'
+  // For recommendations, also require implementation detail
+  if (claimType === 'recommendation') {
+    const hasImplDetail = agree.some(s => s.has_implementation_detail)
+    if (tier1or2.length >= 3 && fulltextTier1or2.length >= 2 && hasImplDetail) {
+      return 'HIGH'
+    }
+  } else {
+    if (tier1or2.length >= 3 && fulltextTier1or2.length >= 2) {
+      return 'HIGH'
+    }
   }
 
   return 'LOW'
 }
 ```
 
-5. **Gate Enforcement**:
+### Gate Enforcement
 
 **Gate A (Depth Gate)**:
-- Check each HIGH confidence claim
-- If < 2 FULLTEXT Tier-1/2 sources: downgrade to LOW
-- Log downgrades in claims.md
+- HIGH confidence requires >= 2 FULLTEXT Tier-1/2 sources
+- If check fails: downgrade to LOW
+
+**Gate B (Completion Gate)** - NEW in v5.0:
+- All recommendation claims must have HIGH confidence, OR
+- LOW confidence claims must have explicit gap declarations
+- If check fails: Document gaps before synthesis
 
 **Gate C (Retraction Gate)**:
-- Already enforced in Phase 3
-- Verify no retracted sources in any claims
+- No retracted papers in HIGH claims
 
-6. **Contradiction Handling**:
-   - If `contested_flag` from STATE.json OR deliverable is VERDICT/COMPARISON:
-     - Run full contradiction analysis
-     - Use structured extraction data if available
-     - Write to `research/{slug}/synthesis/contradictions.md`
-   - Otherwise: Just note disagreements without heavy protocol
+### Gap Declaration (if LOW confidence)
 
-7. **Write claims.md**:
+When a recommendation cannot achieve HIGH confidence, document:
+
+```markdown
+## Gap: {what is unknown}
+
+- **Claim Affected**: {the recommendation this blocks}
+- **Current Confidence**: LOW
+- **Reason**: {why HIGH not achievable}
+- **Impact**: {what can't be determined}
+- **Resolution Path**: {what research would fill this gap}
+```
+
+Write gaps to `research/{slug}/synthesis/gaps.md`
+
+### Write claims.md
 
 ```markdown
 # Claims Registry: {slug}
 
 ## Gate Status
 - Depth Gate (A): {PASSED/FAILED - N claims downgraded}
-- Safety Gate (B): {PASSED - counterevidence reviewed}
+- Completion Gate (B): {PASSED/FAILED - N gaps declared}
 - Retraction Gate (C): {PASSED - N retractions removed}
 
 ## Research Unit: {unit1}
 
 ### Claim 1: {statement}
+- **Type**: recommendation | finding
 - **Confidence**: HIGH | LOW | CONTESTED
-- **Sources**: S1 (FULLTEXT, T1), S4 (FULLTEXT, T2), S7 (ABSTRACT_ONLY, T1)
-- **FULLTEXT support**: 2/3 sources
-- **Evidence**: "{supporting quote}"
-- **Gate A check**: PASSED (2 FULLTEXT T1/T2)
-
-### Claim 2: {statement}
-- **Confidence**: LOW (downgraded from HIGH - insufficient FULLTEXT)
-- **Sources**: S2 (ABSTRACT_ONLY, T1), S3 (ABSTRACT_ONLY, T1), S5 (FULLTEXT, T2)
-- **FULLTEXT support**: 1/3 sources
-- **Evidence**: "{supporting quote}"
-- **Gate A check**: FAILED - only 1 FULLTEXT
-
-## Research Unit: {unit2}
-...
-
-## Contradictions (if any)
-| Topic | Position A | Position B | Status |
-|-------|------------|------------|--------|
-| ... | S1, S3 say X | S5 says Y | UNRESOLVED |
-
-## Structured Data Summary (if VERDICT/COMPARISON)
-### Benchmark Comparisons
-| Metric | Option A | Option B | Source |
-|--------|----------|----------|--------|
-| F1 Score | 0.87 | 0.82 | S1 |
-
-### Statistical Claims
-| Claim | Context | Source |
-|-------|---------|--------|
-| p < 0.01 | A vs B performance | S2 |
-```
-
-Write to `research/{slug}/claims.md`
-
-8. **Update STATE.json gates**:
-```json
-{
-  "gates": {
-    "depth_gate": { "status": "passed", "claims_downgraded": 2 },
-    "safety_gate": { "status": "passed", "counterevidence_sources": 5 },
-    "retraction_gate": { "status": "passed", "removed": 1 }
-  }
-}
+- **Sources**: S1 (FULLTEXT, T1, impl:YES), S4 (FULLTEXT, T2, impl:YES)
+- **Implementation detail**: YES
+- **Gate A check**: PASSED
+- **Gate B check**: PASSED (or: GAP DECLARED - see gaps.md)
 ```
 
 ---
 
-## PHASE 6: SYNTHESIZE
+## PHASE 6: SPECIFY
 
-**Objective**: Generate the primary research deliverable.
+**Objective**: Generate implementation specification (or other deliverable type).
 
 ### Instructions
 
-1. Read:
-   - `research/{slug}/SPEC.md` (deliverable type)
-   - `research/{slug}/claims.md`
-   - `research/{slug}/SOURCES.md`
-   - Structured extractions if present
-
-2. **Verify Gates Before Synthesis**:
-   - Read STATE.json gates status
-   - If Safety Gate (B) failed: STOP, counterevidence must complete first
-   - Log any gate failures in deliverable
+1. Read all compiled data
+2. **Verify Completion Gate** before synthesis:
+   - All recommendations must be HIGH confidence OR have gaps declared
+   - If gate fails: STOP, complete gap documentation first
 
 3. **Generate Deliverable** based on type:
 
-**VERDICT** (recommendation):
+### SPECIFICATION (implementation guidance) - DEFAULT
+
 ```markdown
-# Verdict: {research question}
+# Implementation Specification: {goal}
+
+## Executive Summary
+{2-3 sentences on recommended approach}
+
+**Confidence Level**: HIGH | (explicit gaps listed below)
 
 ## Gate Compliance
-- All gates passed: YES/NO
-- Claims downgraded due to access: N
+- Depth Gate (A): PASSED/FAILED
+- Completion Gate (B): PASSED/FAILED (gaps: N)
+- Retraction Gate (C): PASSED
 
-## Recommendation
-**{RECOMMENDED OPTION}** - Confidence: HIGH | LOW
+## Recommended Architecture
 
-## Comparison Matrix
-| Factor | Option A | Option B | Evidence |
-|--------|----------|----------|----------|
-| {factor} | {assessment} | {assessment} | S1, S4 |
+### Component 1: {name}
+**Selected Method**: {specific method name}
+**Why This Method**:
+- Evidence: S1 (FULLTEXT), S4 (FULLTEXT), S7 (FULLTEXT)
+- Performance: {metrics from literature}
+- Alternatives Considered: {what else, why not}
 
-## Quantitative Comparison (from structured extraction)
-| Metric | Option A | Option B | Winner |
-|--------|----------|----------|--------|
-| {metric} | {value} | {value} | {A/B/Tie} |
+**Implementation Details**:
+- Input: {what it needs}
+- Output: {what it produces}
+- Key Parameters: {from sources}
+- Dependencies: {what must come first}
 
-## Key Evidence
-### For {recommended}:
-- {claim} [HIGH] - Sources: S1 (FULLTEXT), S4 (FULLTEXT)
-
-### Against alternatives:
-- {claim} [LOW - ABSTRACT_ONLY sources] - Source: S2
-
-## Caveats
-- {limitation 1}
-- {Claims limited by paywall access: list}
-
-## Sources
-[Numbered list with access tags]
-```
-
-**REPORT** (comprehensive):
-```markdown
-# Report: {topic}
-
-## Gate Compliance
-- All gates passed: YES/NO
-
-## Summary
-{2-3 paragraphs}
-
-## Findings
-
-### {Research Unit 1}
-{Evidence-based narrative}
-
-**Key claims:**
-- {claim} [HIGH confidence - 3 FULLTEXT sources]
-- {claim} [LOW confidence - single source / ABSTRACT_ONLY]
-
-### {Research Unit 2}
+### Component 2: {name}
 ...
 
-## Limitations
-- {what couldn't be determined}
-- {access limitations: N sources PAYWALLED}
-
-## Sources
-[Numbered list with access tags]
-```
-
-**COMPARISON** (neutral analysis):
-```markdown
-# Comparison: {options}
-
-## Gate Compliance
-- All gates passed: YES/NO
-
-## Matrix
-| Criterion | Option A | Option B | Confidence | Sources |
-|-----------|----------|----------|------------|---------|
-
-## Quantitative Data
-{Table from structured extraction}
-
-## Option A
-### Strengths
-### Weaknesses
-### Best for
-
-## Option B
+## Implementation Sequence
+Step 1: {name} ─depends on→ nothing
+Step 2: {name} ─depends on→ Step 1
 ...
 
-## Selection Guidance
-- Choose A when: {conditions}
-- Choose B when: {conditions}
+## Data Requirements
+| Data Type | Source | Format | Frequency | Evidence |
+|-----------|--------|--------|-----------|----------|
+
+## Risk-Mitigation Table
+| # | Risk | Likelihood | Impact | Mitigation | Evidence |
+|---|------|------------|--------|------------|----------|
+{from Phase 4 failure analysis}
+
+## Validation Approach
+| Metric | Target | Rationale | Evidence |
+|--------|--------|-----------|----------|
+
+## Known Gaps (if any)
+### Gap 1: {what is unknown}
+- **Impact**: {why this matters}
+- **Resolution Path**: {what research would help}
 
 ## Sources
+### Primary (HIGH confidence basis)
+| # | Title | Year | Access | Impl Detail | Relevance |
+|---|-------|------|--------|-------------|-----------|
+
+### Failure Studies
+| # | Title | Year | Key Lesson |
+|---|-------|------|------------|
 ```
 
-**BLUEPRINT** (implementation):
-```markdown
-# Blueprint: {topic}
+### Other Deliverable Types
 
-## Gate Compliance
-- All gates passed: YES/NO
-- Grey literature included: YES
+See `.claude/rules/research.md` for VERDICT, COMPARISON, REPORT, BLUEPRINT, BIBLIOGRAPHY formats.
 
-## Overview
-{What this achieves}
-
-## Architecture
-{High-level design}
-
-## Implementation Steps
-### Step 1: {action}
-- Evidence basis: {citation} [confidence]
-- Standards reference: {grey literature citation if applicable}
-- Common pitfalls: {warning}
-
-## Best Practices
-{Evidence-based recommendations}
-
-## Relevant Standards
-{From grey literature pass}
-
-## Sources
-```
-
-**BIBLIOGRAPHY** (annotated sources):
-```markdown
-# Bibliography: {topic}
-
-## Summary
-- Total sources: N
-- Access: FULLTEXT: N | ABSTRACT_ONLY: N | PAYWALLED: N
-
-## Essential Reading
-### {Citation}
-- Access: FULLTEXT | ABSTRACT_ONLY
-- Summary: {what it covers}
-- Key insight: {main contribution}
-- Quality: {assessment}
-
-## Supplementary
-...
-```
-
-4. Write to `research/{slug}/synthesis/final_deliverable.md`
+Write to `research/{slug}/synthesis/final_deliverable.md`
 
 ---
 
-## PHASE 7: CRITIQUE
+## PHASE 7: VALIDATE
 
-**Objective**: Self-assess research quality with gate compliance (max 1 page).
+**Objective**: Self-assess, ensure all gates passed, document limitations.
 
 ### Instructions
 
-1. Read:
-   - `research/{slug}/synthesis/final_deliverable.md`
-   - `research/{slug}/SOURCES.md`
-   - `research/{slug}/claims.md`
-   - `research/{slug}/STATE.json`
-
-2. **Generate Critique** (concise, 1 page max):
+1. Read all outputs
+2. Verify all gates passed
+3. Generate critique (max 1 page):
 
 ```markdown
 # Critique: {slug}
@@ -943,46 +664,30 @@ Write to `research/{slug}/claims.md`
 | Gate | Status | Impact |
 |------|--------|--------|
 | Depth (A) | PASSED/FAILED | {N claims downgraded} |
-| Safety (B) | PASSED/FAILED | {counterevidence status} |
+| Completion (B) | PASSED/FAILED | {N gaps declared} |
 | Retraction (C) | PASSED/FAILED | {N removed} |
 
 ## Completeness
-| Research Unit | Sources | FULLTEXT | Confidence | Gaps |
-|---------------|---------|----------|------------|------|
-| {unit1} | N | N/N | HIGH/LOW | {any gaps} |
-
-## Source Quality
-- Academic: N% (target: {target}%)
-- Tier 1: N sources
-- Access breakdown:
-  - FULLTEXT: N sources (can support HIGH confidence)
-  - ABSTRACT_ONLY: N sources (limits confidence)
-  - PAYWALLED: N sources (impact: {low/medium/high})
+| Unit | Sources | FULLTEXT | Impl Detail | Confidence | Gaps |
+|------|---------|----------|-------------|------------|------|
 
 ## Confidence Summary
-- HIGH confidence claims: N (all with >=2 FULLTEXT T1/T2)
-- LOW confidence claims: N
-  - Due to insufficient sources: N
-  - Due to access limitations: N
-- CONTESTED claims: N
+- HIGH confidence recommendations: N
+- LOW confidence (with gaps): N
+- CONTESTED: N
 
 ## Key Limitations
-1. {Most important limitation}
-2. {Access-related limitation}
-3. {Coverage gap}
+1. {most important}
+2. {access-related}
+3. {coverage gap}
 
 ## What Could Invalidate Conclusions
 - If {assumption} is false, then {consequence}
-- If paywalled sources {S3, S7} contradict, then {impact}
-
-## Recommended Follow-Up
-- {Specific action to strengthen findings}
-- {Sources worth obtaining full access to}
 ```
 
-3. Write to `research/{slug}/synthesis/critique.md`
+Write to `research/{slug}/synthesis/critique.md`
 
-4. **Update STATE.json**:
+4. Update STATE.json:
 ```json
 {
   "phase": "complete",
@@ -990,10 +695,9 @@ Write to `research/{slug}/claims.md`
   "summary": {
     "sources": 25,
     "claims": 12,
-    "high_confidence": 5,
-    "low_confidence": 6,
-    "contested": 1,
-    "fulltext_rate": 0.72,
+    "high_confidence": 8,
+    "low_confidence_with_gaps": 3,
+    "risk_mitigation_pairs": 7,
     "all_gates_passed": true
   }
 }
@@ -1004,29 +708,26 @@ Write to `research/{slug}/claims.md`
 ```
 ## Research Complete: {slug}
 
-### Gate Status
-- All gates PASSED ✓
+### Posture: Implementation-Focused
+All recommendations backed by evidence with implementation detail.
 
-### Key Findings
-{3-5 bullet summary}
+### Gate Status
+- All gates PASSED ✓ (or: N gaps declared)
+
+### Key Recommendations
+{3-5 bullet summary of selected methods}
 
 ### Confidence Profile
-- HIGH confidence claims: N
-- LOW confidence claims: N
-- CONTESTED claims: N
-- Full-text access rate: N%
+- HIGH confidence recommendations: N
+- Gaps documented: N
+- Risk-mitigation pairs: N
 
 ### Files Created
-- `synthesis/final_deliverable.md` - Main output
+- `PLAN.md` - Approved research plan
+- `synthesis/final_deliverable.md` - Implementation specification
+- `synthesis/risk_mitigations.md` - Risk-mitigation pairs
+- `synthesis/gaps.md` - Gap declarations (if any)
 - `synthesis/critique.md` - Quality assessment
-- `claims.md` - Evidence registry with gate checks
-- `SOURCES.md` - Source list with access tags
-- `logs/dedup_log.json` - Deduplication decisions
-- `logs/retraction_flags.json` - Retraction check results
-
-### Access Limitations
-- {N} sources were ABSTRACT_ONLY
-- {N} sources were PAYWALLED
 
 What would you like to explore further?
 ```
@@ -1037,52 +738,50 @@ What would you like to explore further?
 
 **SPEC not found**: STOP, inform user to create SPEC.md first
 
+**Plan not approved**: STOP, wait for user approval
+
 **Discovery fails**: Continue with successful agents, note gaps
 
 **Extraction fails**: Tag as ABSTRACT_ONLY, note limitation
 
-**Sources insufficient**: Broaden search, accept partial coverage, document in critique
+**Sources insufficient**: Broaden search, document gaps
 
 **Gate failures**:
 - Depth Gate: Downgrade confidence, continue
-- Safety Gate: MUST complete counterevidence before synthesis
+- Completion Gate: Document gaps, then continue to synthesis
 - Retraction Gate: Remove source, recalculate claims
-
-**Unpaywall API fails**: Fall back to ABSTRACT_ONLY tag, note in logs
 
 ---
 
-## FILE STRUCTURE
+## FILE STRUCTURE (v5.0)
 
 ```
 research/{slug}/
-├── SPEC.md                      # Input specification
-├── STATE.json                   # Workflow state (with gates, config)
-├── SOURCES.md                   # Curated source list with access tags
+├── PLAN.md                      # Research plan (requires approval)
+├── SPEC.md                      # Input specification (Goal, not Question)
+├── STATE.json                   # Workflow state (v3.0 schema)
+├── SOURCES.md                   # Source list with impl detail flags
 ├── claims.md                    # Evidence registry with gate checks
 ├── discovery/
-│   ├── academic.md              # Academic pass results
-│   ├── practitioner.md          # Practitioner pass (if run)
-│   ├── counterevidence.md       # Counterevidence pass (standard+)
-│   ├── grey_literature.md       # Grey literature (BLUEPRINT only)
-│   └── snowball.md              # Citation snowball expansion
+│   ├── academic.md              # Academic pass
+│   ├── practitioner.md          # Practitioner pass
+│   ├── failure_analysis.md      # Failure studies (was counterevidence)
+│   ├── grey_literature.md       # BLUEPRINT only
+│   └── snowball.md              # Citation expansion
 ├── topics/
-│   ├── {unit1_slug}/
-│   │   ├── findings.md          # Extracted evidence (11 fields)
-│   │   └── findings_structured.json  # Structured extraction (VERDICT/COMPARISON)
-│   ├── {unit2_slug}/
-│   │   ├── findings.md
-│   │   └── findings_structured.json
-│   └── ...
+│   └── {unit}/
+│       ├── findings.md          # 12-field extraction
+│       └── findings_structured.json
 ├── synthesis/
 │   ├── final_deliverable.md     # PRIMARY OUTPUT
-│   ├── critique.md              # Quality assessment with gate compliance
-│   └── contradictions.md        # If contested
+│   ├── critique.md              # Quality assessment
+│   ├── risk_mitigations.md      # Compiled risk-mitigation pairs
+│   └── gaps.md                  # Gap declarations (if any)
 └── logs/
-    ├── runlog.ndjson            # Tool execution log
-    ├── checkpoint.md            # Resume checkpoint
-    ├── dedup_log.json           # Deduplication decisions
-    └── retraction_flags.json    # Retraction check results
+    ├── runlog.ndjson
+    ├── checkpoint.md
+    ├── dedup_log.json
+    └── retraction_flags.json
 ```
 
 ---
@@ -1091,10 +790,10 @@ research/{slug}/
 
 ### Discovery
 - `mcp__openalex__search_works` - Academic papers
-- `mcp__openalex__get_work_references` - Backward snowball (citations in paper)
-- `mcp__openalex__get_work_citations` - Forward snowball (papers citing this)
+- `mcp__openalex__get_work_references` - Backward snowball
+- `mcp__openalex__get_work_citations` - Forward snowball
 - `mcp__arxiv__search_papers` - Preprints
-- `mcp__exa__web_search_exa` - Web sources, grey literature
+- `mcp__exa__web_search_exa` - Web sources
 - `mcp__crossref__searchByTitle` - Title lookup
 
 ### Extraction
@@ -1103,19 +802,7 @@ research/{slug}/
 
 ### Verification & Access
 - `mcp__crossref__getWorkByDOI` - DOI validation, retraction check
-- `WebFetch` to Unpaywall API - Full-text resolution:
+- `WebFetch` to Unpaywall API:
   ```
   https://api.unpaywall.org/v2/{doi}?email=research@example.com
   ```
-
-### Unpaywall Response Fields
-```json
-{
-  "is_oa": true,
-  "best_oa_location": {
-    "url": "https://...",
-    "url_for_pdf": "https://...",
-    "license": "cc-by"
-  }
-}
-```

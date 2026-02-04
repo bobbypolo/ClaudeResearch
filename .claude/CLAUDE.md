@@ -1,61 +1,111 @@
-# Research ADE v4.0 - Project Constitution
+# Research ADE v5.0 - Project Constitution
 
 ## Overview
 
-**Research ADE** is an autonomous research system that produces high-quality, evidence-based research outputs in a single session. The system uses MCP tools to search academic databases, preprint servers, and web resources.
+**Research ADE** is an autonomous research system that produces **implementation-ready specifications** through systematic evidence gathering. The system uses MCP tools to search academic databases, preprint servers, and web resources.
+
+**Core Philosophy:**
+- **Optimistic-Empirical**: Solutions exist until proven otherwise
+- **Implementation-Focused**: "How to build" not "is it possible"
+- **HIGH Confidence Required**: Definitive answers or explicit gaps
+- **Evidence-Based Recommendations**: Every method selection backed by sources
 
 **Key Features:**
-- 7-phase workflow with parallel execution
+- 8-phase workflow with mandatory planning
+- Implementation-oriented discovery
+- Failure studies with risk-mitigation pairs
+- Completion gate ensuring actionable output
+- New SPECIFICATION deliverable type
 - Full-text access layer with Unpaywall integration
-- Enforcement gates (Depth, Safety, Retraction)
 - Citation snowballing (backward + forward)
 - Intelligent deduplication pipeline
-- Structured data extraction for comparisons
-- Grey literature pass for BLUEPRINT deliverables
-- Domain-aware recency policies
-- Simplified confidence grading (HIGH/LOW/CONTESTED)
 
 All outputs are persisted to `research/{slug}/` for reproducibility.
 
 ---
 
-## The Seven Principles
+## The Eight Principles
 
-### Principle 1: Write to Files, Not Context
+### Principle 1: Plan Before Research
+
+**Rule**: Every research project begins with a comprehensive plan that the user approves.
+
+**PLAN Phase Requirements:**
+1. Analyze user's goal statement
+2. Decompose into research questions
+3. Identify prior art search strategies
+4. Define success criteria (what HIGH confidence looks like)
+5. Anticipate potential sub-domains
+6. Create research unit structure
+
+**Outputs:**
+- `research/{slug}/PLAN.md` - Research plan for user review
+- Initial SPEC.md validation
+
+**Critical**: Research does NOT proceed until user approves the plan.
+
+---
+
+### Principle 2: Implementation Over Assessment
+
+**Rule**: Default posture is "How do we build this?" not "Is this feasible?"
+
+**Discovery Focus:**
+- Prioritize implementation papers
+- Extract specific methods and parameters
+- Find validation metrics and baselines
+- Gather architectural patterns
+
+**Search Strategy:**
+```
+Primary: "{goal} implementation" "{goal} system design" "{goal} method"
+Secondary: "{goal} architecture" "{goal} pipeline" "{goal} best practices"
+```
+
+**Avoid:**
+- Feasibility hedging ("it depends", "under certain conditions")
+- Listing possibilities without selection
+- Concluding with "more research needed" without specifics
+
+---
+
+### Principle 3: Write to Files, Not Context
 
 **Rule**: All outputs MUST be written to `research/{slug}/` files. Return only summaries to orchestrator.
 
 **File Structure:**
 ```
 research/{slug}/
-├── SPEC.md                     # Input specification
-├── STATE.json                  # Workflow state and config
+├── PLAN.md                      # Research plan (NEW)
+├── SPEC.md                      # Input specification
+├── STATE.json                   # Workflow state and config
 ├── discovery/
-│   ├── academic.md             # Academic pass results
-│   ├── practitioner.md         # Practitioner pass (if run)
-│   ├── counterevidence.md      # Counterevidence pass (always for standard+)
-│   ├── grey_literature.md      # Grey literature pass (BLUEPRINT only)
-│   └── snowball.md             # Citation snowball expansion
-├── SOURCES.md                  # Curated source list
+│   ├── academic.md              # Academic pass results
+│   ├── practitioner.md          # Practitioner pass (if run)
+│   ├── failure_analysis.md      # Failure studies (RENAMED)
+│   ├── grey_literature.md       # Grey literature (BLUEPRINT only)
+│   └── snowball.md              # Citation snowball expansion
+├── SOURCES.md                   # Curated source list
 ├── topics/
 │   └── {unit}/
-│       ├── findings.md         # Extracted evidence per unit
-│       └── findings_structured.json  # Structured extraction (VERDICT/COMPARISON)
-├── claims.md                   # Evidence registry
+│       ├── findings.md          # Extracted evidence per unit
+│       └── findings_structured.json  # Structured extraction
+├── claims.md                    # Evidence registry
 ├── synthesis/
-│   ├── final_deliverable.md    # PRIMARY OUTPUT
-│   ├── critique.md             # Quality assessment
-│   └── contradictions.md       # If contested
+│   ├── final_deliverable.md     # PRIMARY OUTPUT
+│   ├── critique.md              # Quality assessment
+│   ├── risk_mitigations.md      # Risk-mitigation pairs (NEW)
+│   └── gaps.md                  # Gap declarations if any (NEW)
 └── logs/
-    ├── runlog.ndjson           # Tool execution log
-    ├── checkpoint.md           # Resume checkpoint
-    ├── dedup_log.json          # Deduplication decisions
-    └── retraction_flags.json   # Retraction check results
+    ├── runlog.ndjson            # Tool execution log
+    ├── checkpoint.md            # Resume checkpoint
+    ├── dedup_log.json           # Deduplication decisions
+    └── retraction_flags.json    # Retraction check results
 ```
 
 ---
 
-### Principle 2: Quality Over Quantity
+### Principle 4: Quality Over Quantity
 
 **Rule**: Find the RIGHT sources, not the MOST. Cap at 12 sources per research unit.
 
@@ -65,14 +115,14 @@ research/{slug}/
 - >50% duplicates in recent searches
 - Snowball expansion adds diminishing returns
 
-**Avoid:**
-- Padding bibliographies
-- Including low-quality sources for numbers
-- Sources without full-text access when HIGH confidence needed
+**Prioritize:**
+- Sources with implementation detail (code, parameters, architecture)
+- Validation studies with reproducible metrics
+- Failure studies with lessons learned
 
 ---
 
-### Principle 3: Tier Sources with Access Verification
+### Principle 5: Tier Sources with Access Verification
 
 **Rule**: Maintain source quality mix AND verify access depth.
 
@@ -89,78 +139,93 @@ research/{slug}/
 | **ABSTRACT_ONLY** | Only abstract/metadata available |
 | **PAYWALLED** | Behind paywall, no OA version found |
 
-**Auto-Adjust:** If academic sources scarce, relax to 50/40/10.
-
-**Never Cite:**
-- No author/date
-- News articles, forums
-- SEO content, AI-generated
-- Retracted papers (enforced by Retraction Gate)
+**Implementation Detail Flag:**
+Sources are additionally flagged if they contain implementation specifics (code, parameters, architecture diagrams).
 
 ---
 
-### Principle 4: Gated Confidence
+### Principle 6: Failure Studies as Learning
 
-**Rule**: Three confidence levels with enforcement gates.
+**Rule**: Counterevidence is reframed as failure analysis with risk-mitigation pairs.
 
+**Old Approach (v4.0):**
+- "Find reasons this might not work"
+- Creates defensive, hedging output
+
+**New Approach (v5.0):**
+- "Find implementations that failed"
+- "Extract lessons learned"
+- "Pair each risk with a mitigation"
+
+**Search Strategy:**
+```
+Primary: "{method} failed" "{method} failure" "{method} pitfalls"
+Secondary: "{method} lessons learned" "{method} postmortem"
+Tertiary: "{domain} what went wrong" "{domain} debugging"
+```
+
+**Output Format (per failure study):**
+```markdown
+## Failure Study: {source}
+
+### What They Tried
+- Method: {specific approach}
+- Context: {conditions}
+
+### What Failed
+- Failure Mode: {observable failure}
+- Root Cause: {why it failed}
+
+### Lessons Learned
+- {insight 1}
+- {insight 2}
+
+### Risk-Mitigation Pair
+| Risk | Mitigation | Evidence |
+|------|------------|----------|
+| {risk from this failure} | {how to avoid} | {source} |
+```
+
+---
+
+### Principle 7: HIGH Confidence or Explicit Gaps
+
+**Rule**: Research ONLY ends when:
+1. All recommendations have HIGH confidence, OR
+2. Gaps are explicitly declared with clear documentation
+
+**Confidence Levels:**
 | Level | Requirement |
 |-------|-------------|
-| **HIGH** | 3+ Tier-1/2 sources agree AND 2+ are FULLTEXT |
+| **HIGH** | 3+ Tier-1/2 sources agree AND 2+ are FULLTEXT AND implementation detail present |
 | **LOW** | 1-2 sources OR only ABSTRACT_ONLY/PAYWALLED |
 | **CONTESTED** | Credible sources disagree |
 
-**Enforcement Gates:**
+**Gap Declaration Format:**
+```markdown
+## Gap: {what is unknown}
+- **Impact**: {why this matters for implementation}
+- **Blocking**: {what can't be determined without this}
+- **Resolution Path**: {what research would fill this gap}
+```
 
-| Gate | Check | Failure Action |
-|------|-------|----------------|
-| **Gate A: Depth** | HIGH confidence requires >=2 FULLTEXT Tier-1/2 sources | Downgrade to LOW |
-| **Gate B: Safety** | Counterevidence pass runs for standard+ presets | Block synthesis until complete |
-| **Gate C: Retraction** | No retracted papers in HIGH claims | Remove source, recalculate confidence |
-
-No MEDIUM. If it's not HIGH, it's LOW or CONTESTED.
-
----
-
-### Principle 5: SPEC-Responsive Synthesis
-
-**Rule**: Output format MUST match requested deliverable.
-
-| Deliverable | When to Use | Special Handling |
-|-------------|-------------|------------------|
-| **VERDICT** | "Which should I use?" | Structured extraction required |
-| **REPORT** | "What is X?" | Comprehensive findings |
-| **COMPARISON** | "Compare A vs B" | Structured extraction required |
-| **BLUEPRINT** | "How to design X?" | Grey literature pass |
-| **BIBLIOGRAPHY** | "What sources exist?" | Annotated list |
+**Completion Gate** enforces this before synthesis.
 
 ---
 
-### Principle 6: Explicit Limitations
+### Principle 8: One-Session Completion
 
-**Rule**: Always document gaps in `synthesis/critique.md`.
-
-Document:
-- Inaccessible sources (impact level) with access tags
-- Thin coverage areas
-- LOW confidence claims (noting if due to access limitations)
-- CONTESTED findings
-- What could invalidate conclusions
-- Gate failures and their impact
-
----
-
-### Principle 7: One-Session Completion
-
-**Rule**: Complete in 7 phases with parallel execution where possible.
+**Rule**: Complete in 8 phases with parallel execution where possible.
 
 ```
+Phase 0: PLAN         Comprehensive research plan → PLAN.md (user approval required)
 Phase 1: PARSE        Parse SPEC, detect complexity, recency policy → STATE.json
-Phase 2: DISCOVER     2-3 passes + snowball expansion + grey literature
-Phase 3: CURATE       Deduplicate, retraction check, full-text resolution → SOURCES.md
-Phase 4: EXTRACT      Extract with depth tagging, structured extraction → findings
+Phase 2: SURVEY       Broad discovery pass (implementation-focused)
+Phase 3: DEEP DIVE    Evidence-driven depth allocation
+Phase 4: FAILURE      Failure studies + risk-mitigation extraction
 Phase 5: COMPILE      Build claims registry, enforce gates → claims.md
-Phase 6: SYNTHESIZE   Generate deliverable → synthesis/final_deliverable.md
-Phase 7: CRITIQUE     Self-assess with gate compliance → synthesis/critique.md
+Phase 6: SPECIFY      Generate deliverable → synthesis/final_deliverable.md
+Phase 7: VALIDATE     Self-assess, ensure HIGH confidence → synthesis/critique.md
 ```
 
 ---
@@ -192,8 +257,8 @@ API: https://api.unpaywall.org/v2/{doi}?email=research@example.com
 **When**: After initial keyword discovery, before curation.
 
 **Process:**
-1. **Backward**: Get references of top-cited papers via OpenAlex `get_work_references`
-2. **Forward**: Get citing papers via OpenAlex `get_work_citations`
+1. **Backward**: Get references of top-cited papers via OpenAlex
+2. **Forward**: Get citing papers via OpenAlex
 3. **Filter**: Apply recency policy, deduplicate against existing
 
 **Limits:**
@@ -216,59 +281,16 @@ Priority 2: title|first_author_last|year fingerprint
 - Keep version with better access (FULLTEXT > ABSTRACT_ONLY)
 - Preserve all unique metadata
 
-**Output**: `logs/dedup_log.json` with merge decisions
-
 ---
 
-### Structured Data Extraction
+### Implementation Detail Detection
 
-**Applies to**: VERDICT and COMPARISON deliverables only.
-
-**Extract:**
-```json
-{
-  "benchmark_results": [
-    {"metric": "F1 score", "value": 0.87, "dataset": "SQuAD", "source": "S1"}
-  ],
-  "statistical_claims": [
-    {"claim": "p < 0.01", "context": "performance comparison", "source": "S2"}
-  ],
-  "comparisons": [
-    {"item_a": "Method X", "item_b": "Method Y", "dimension": "speed", "winner": "X", "margin": "2.3x", "source": "S3"}
-  ]
-}
-```
-
-**Output**: `topics/{unit}/findings_structured.json`
-
----
-
-### Grey Literature Pass
-
-**When**: BLUEPRINT deliverable only.
-
-**Sources:**
-- NIST publications
-- RAND Corporation
-- Standards bodies (IEEE, ISO, W3C)
-- Government technical reports (.gov domains)
-- Major vendor architecture guides
-
-**Output**: `discovery/grey_literature.md`
-
----
-
-### Recency Policy
-
-**Auto-detect from topic:**
-
-| Domain | Policy | Max Age | Example Topics |
-|--------|--------|---------|----------------|
-| **fast_moving** | 18 months | LLMs, crypto, emerging tech |
-| **scientific** | 5 years | Established CS, biology |
-| **historical** | No limit | Philosophy, history |
-
-**Foundational Exception:** Seminal papers always included regardless of age.
+**Sources flagged as having implementation detail if they contain:**
+- Code snippets or pseudocode
+- Architecture diagrams
+- Parameter tables or configuration
+- Reproducibility sections
+- Benchmark comparisons with specific metrics
 
 ---
 
@@ -279,11 +301,9 @@ The system auto-detects complexity from SPEC and applies presets:
 | Preset | Sources/Unit | Extraction | Passes | Auto-Trigger |
 |--------|--------------|------------|--------|--------------|
 | `quick` | 2 | light | 2 | Simple questions |
-| `standard` | 3 | medium | 3 | Default (counterevidence now required) |
+| `standard` | 3 | medium | 3 | Default |
 | `thorough` | 5 | deep | 3 | Complex/critical |
 | `decision-support` | 4 | deep | 3 | VERDICT/COMPARISON |
-
-**Contested Flag:** Set true if VERDICT/COMPARISON or "vs/compare/which/should" in SPEC.
 
 ---
 
@@ -292,40 +312,67 @@ The system auto-detects complexity from SPEC and applies presets:
 | Pass | When | Purpose |
 |------|------|---------|
 | **Academic** | Always | Peer-reviewed + arXiv |
-| **Practitioner** | BLUEPRINT/VERDICT or >=standard | Case studies, docs |
-| **Counterevidence** | Always for >=standard (Safety Gate) | Critiques, failures |
+| **Practitioner** | BLUEPRINT/SPECIFICATION or >=standard | Case studies, docs |
+| **Failure Analysis** | Always for >=standard | Failure studies, lessons learned |
 | **Grey Literature** | BLUEPRINT only | Standards, gov reports |
 | **Snowball** | >=standard preset | Citation expansion |
 
 ---
 
+## Deliverable Types
+
+| Deliverable | When to Use | Special Handling |
+|-------------|-------------|------------------|
+| **SPECIFICATION** | "How to build X?" (DEFAULT) | Implementation blueprint with method selections |
+| **VERDICT** | "Which should I use?" | Structured extraction required |
+| **COMPARISON** | "Compare A vs B" | Structured extraction required |
+| **REPORT** | "What is X?" | Comprehensive findings |
+| **BLUEPRINT** | "How to design X?" | Grey literature pass |
+| **BIBLIOGRAPHY** | "What sources exist?" | Annotated list |
+
+---
+
 ## Extraction Template
 
-**11 Essential Fields:**
+**12 Essential Fields:**
 ```markdown
 - Citation: {full}
 - Type: ACADEMIC | PRACTITIONER | OTHER
 - Tier: 1 | 2 | 3
 - Extraction depth: FULLTEXT | ABSTRACT_ONLY | PAYWALLED
+- Has implementation detail: YES | NO
 - Source URL: {accessible URL}
 - Sections extracted: {e.g., "Abstract, Methods, Results"}
 - Main claim: {one sentence}
 - Key evidence: "{quote}" (location)
+- Implementation specifics: {methods, parameters, if present}
 - Limitations: {caveats}
 - Relevance: {unit}
-- Notes: {optional}
 ```
 
 ---
 
-## Contradiction Handling
+## Gates
 
-**Only for VERDICT/COMPARISON or contested_flag:**
-1. Analyze why they disagree
-2. Prefer: replicated > recent > higher tier > FULLTEXT
-3. Categorize: RESOLVED | CONTEXT-DEPENDENT | UNRESOLVED
+| Gate | Check | Failure Action |
+|------|-------|----------------|
+| **Depth Gate (A)** | HIGH confidence requires >=2 FULLTEXT Tier-1/2 sources | Downgrade to LOW |
+| **Completion Gate (B)** | All recommendations HIGH confidence OR gaps declared | Block synthesis until resolved |
+| **Retraction Gate (C)** | No retracted papers in HIGH claims | Remove source, recalculate confidence |
 
-**Otherwise:** Just note disagreements, don't run heavy protocol.
+---
+
+## Recency Policy
+
+**Auto-detect from topic:**
+
+| Domain | Policy | Max Age | Example Topics |
+|--------|--------|---------|----------------|
+| **fast_moving** | 18 months | LLMs, crypto, emerging tech |
+| **scientific** | 5 years | Established CS, biology |
+| **historical** | No limit | Philosophy, history |
+
+**Foundational Exception:** Seminal papers always included regardless of age.
 
 ---
 
@@ -349,7 +396,7 @@ The system auto-detects complexity from SPEC and applies presets:
 
 | Skill | Purpose |
 |-------|---------|
-| `/research {slug} [--preset]` | Execute 7-phase workflow |
+| `/research {slug} [--preset]` | Execute 8-phase workflow |
 | `/research-status {slug}` | Check progress |
 | `/research-resume {slug}` | Resume from checkpoint |
 
@@ -359,7 +406,7 @@ The system auto-detects complexity from SPEC and applies presets:
 
 ## Quick Reference
 
-**Confidence:** HIGH (3+ T1/2 + 2 FULLTEXT) | LOW (1-2 or access-limited) | CONTESTED (disagree)
+**Confidence:** HIGH (3+ T1/2 + 2 FULLTEXT + implementation detail) | LOW (1-2 or access-limited) | CONTESTED (disagree)
 
 **Access Depth:** FULLTEXT | ABSTRACT_ONLY | PAYWALLED
 
@@ -367,13 +414,15 @@ The system auto-detects complexity from SPEC and applies presets:
 
 **Tiers:** T1 (peer-reviewed) | T2 (preprints) | T3 (industry)
 
-**Gates:** Depth (HIGH needs FULLTEXT) | Safety (counterevidence required) | Retraction (no retracted)
+**Gates:** Depth (HIGH needs FULLTEXT) | Completion (HIGH or gaps) | Retraction (no retracted)
 
 **Recency:** fast_moving (18mo) | scientific (5yr) | historical (unlimited)
 
-**Phases:** Parse → Discover → Curate → Extract → Compile → Synthesize → Critique
+**Phases:** Plan → Parse → Survey → Deep Dive → Failure → Compile → Specify → Validate
+
+**Default Posture:** "Solutions exist until proven otherwise"
 
 ---
 
 *For detailed schemas, see `.claude/rules/research.md`*
-*Version: 4.0*
+*Version: 5.0*

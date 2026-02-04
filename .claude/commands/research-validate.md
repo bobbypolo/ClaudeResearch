@@ -28,6 +28,7 @@ Read the following files:
 - `research/{slug}/logs/retraction_flags.json` - Retracted sources (if exists)
 - `research/{slug}/logs/dedup_log.json` - Deduplication log (if exists)
 - `research/{slug}/claims.md` - Claims registry (if exists)
+- `research/{slug}/synthesis/gaps.md` - Gap declarations (if exists, for Completion Gate)
 
 ### Step 3: Run Quality Gate Checks
 
@@ -107,6 +108,17 @@ If `logs/dedup_log.json` exists, check for remaining duplicates:
 **WARN**: 1-3 potential duplicates with similarity 0.85-0.9
 **FAIL**: >3 potential duplicates OR any with similarity > 0.95
 
+#### Check 6: Completion Gate (v5.0)
+
+For each recommendation claim in claims.md:
+- If confidence = HIGH: PASS (no gap needed)
+- If confidence = LOW: Check if gap is declared in `synthesis/gaps.md`
+- If confidence = LOW and no gap declared: FAIL
+
+**PASS**: All recommendations have HIGH confidence OR declared gaps
+**WARN**: All gaps declared but >30% of recommendations are LOW
+**FAIL**: Any LOW confidence recommendation without gap declaration
+
 ### Step 4: Calculate Overall Assessment
 
 | Result | Criteria |
@@ -157,6 +169,12 @@ If `logs/dedup_log.json` exists, check for remaining duplicates:
 - Potential duplicates remaining: N
 - Flagged pairs: [list if any]
 
+### Check 6: Completion Gate (v5.0)
+**Status**: [PASS | WARN | FAIL]
+- HIGH confidence recommendations: N
+- LOW confidence with gaps declared: N
+- LOW confidence without gaps: N (must be 0 to pass)
+
 ---
 
 ### Recommendations
@@ -175,6 +193,7 @@ If `logs/dedup_log.json` exists, check for remaining duplicates:
 - Retracted sources: Remove from SOURCES.md
 - LOW coverage: Run additional extraction
 - Invalid HIGH claims: Downgrade to LOW or find more sources
+- Completion Gate failed: Declare gaps for LOW confidence recommendations in `synthesis/gaps.md`
 - Run `/research-validate {slug}` again after fixes
 ```
 
@@ -212,6 +231,12 @@ Write results to `research/{slug}/logs/validation.json`:
       "status": "PASS",
       "removed": 3,
       "potential": 0
+    },
+    "completion_gate": {
+      "status": "PASS",
+      "high_confidence": 5,
+      "low_with_gaps": 2,
+      "low_without_gaps": 0
     }
   }
 }
@@ -239,7 +264,7 @@ Note: dedup_log.json not found - deduplication check skipped
 
 This command should be run:
 1. After Phase 5 (Compile) completes
-2. Before Phase 6 (Synthesize) begins
+2. Before Phase 6 (Specify) begins
 3. Optionally: manually at any point to check quality
 
 If validation fails, the user should:
