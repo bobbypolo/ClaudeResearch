@@ -376,4 +376,4 @@ The system auto-detects complexity from SPEC and applies presets:
 ---
 
 *For detailed schemas, see `.claude/rules/research.md`*
-*Version: 2.0*
+*Version: 4.0*
