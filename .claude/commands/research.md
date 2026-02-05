@@ -161,10 +161,11 @@ recency_policy = detectRecencyPolicy(spec)
 // Returns: 'fast_moving' | 'scientific' | 'historical'
 
 max_age_years = {
-  'fast_moving': 1.5,    // 18 months
+  'fast_moving': 2,       // ~18-24 months (use 2 for integer API calls)
   'scientific': 5,        // 5 years
   'historical': null      // No limit
 }[recency_policy]
+// NOTE: OpenAlex requires INTEGER years. Always floor() the year calculation.
 ```
 
 6. **Write STATE.json** (v3.0 schema):
@@ -287,10 +288,14 @@ TaskCreate:
     - Min per unit: {min_sources_per_unit}
     - Max per unit: 12
     - Recency Policy: {recency_policy}
+    - Year Filter: from_publication_year = {current_year - max_age_years, rounded down to integer}
+      (e.g., fast_moving in 2026: floor(2026 - 1.5) = 2024)
 
     TOOLS:
     1. ToolSearch "+openalex search" → mcp__openalex__search_works
     2. ToolSearch "+arxiv" → mcp__arxiv__search_papers
+
+    CRITICAL: When calling OpenAlex, use INTEGER years only (e.g., 2024, not 2024.5)
 
     SEARCH STRATEGY (Implementation-focused):
     - Prioritize: papers with methods sections, reproducibility, code

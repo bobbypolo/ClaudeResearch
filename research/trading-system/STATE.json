@@ -1,0 +1,66 @@
+{
+  "version": "5.0",
+  "slug": "trading-system",
+  "preset": "thorough",
+  "posture": "optimistic-empirical",
+  "min_sources_per_unit": 5,
+  "extraction_depth": "deep",
+  "tier_targets": {
+    "academic": 70,
+    "practitioner": 25,
+    "other": 5
+  },
+  "research_units": [
+    "retail-alpha-audit",
+    "small-cap-structural-edges",
+    "set-and-forget-feasibility"
+  ],
+  "deliverable": "VERDICT",
+  "phase": "survey",
+  "started_at": "2026-02-04T00:00:00Z",
+  "completed_at": null,
+  "plan_approved": true,
+  "config": {
+    "recency_policy": "fast_moving",
+    "max_age_years": 2,
+    "foundational_exception": true,
+    "snowball": {
+      "enabled": true,
+      "max_seeds_per_unit": 5,
+      "max_snowball_sources": 10
+    },
+    "grey_literature": false,
+    "structured_extraction": true,
+    "failure_analysis": true
+  },
+  "gates": {
+    "depth_gate": {
+      "required_fulltext": 2,
+      "status": "pending"
+    },
+    "completion_gate": {
+      "requires_high_confidence": true,
+      "status": "pending",
+      "gaps_declared": []
+    },
+    "retraction_gate": {
+      "status": "pending"
+    }
+  },
+  "statistics": {
+    "sources_found": 0,
+    "sources_deduplicated": 0,
+    "fulltext_resolved": 0,
+    "abstract_only": 0,
+    "paywalled": 0,
+    "retractions_found": 0,
+    "snowball_added": 0,
+    "failure_studies_found": 0,
+    "risk_mitigation_pairs": 0
+  },
+  "confidence_tracking": {
+    "high_confidence_claims": 0,
+    "low_confidence_claims": 0,
+    "gaps_requiring_research": []
+  }
+}

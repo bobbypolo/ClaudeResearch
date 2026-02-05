@@ -1,0 +1,73 @@
+{
+  "version": "3.0",
+  "slug": "probability-system-sports",
+  "preset": "thorough",
+  "posture": "optimistic-empirical",
+  "min_sources_per_unit": 5,
+  "extraction_depth": "deep",
+  "tier_targets": {
+    "academic": 70,
+    "practitioner": 25,
+    "other": 5
+  },
+  "research_units": [
+    "single-leg-probability",
+    "joint-probability",
+    "market-microstructure",
+    "portfolio-optimization"
+  ],
+  "deliverable": "SPECIFICATION",
+  "phase": "complete",
+  "started_at": "2026-02-04T00:00:00Z",
+  "completed_at": "2026-02-04T23:59:59Z",
+  "plan_approved": true,
+  "config": {
+    "recency_policy": "scientific",
+    "max_age_years": 5,
+    "foundational_exception": true,
+    "snowball": {
+      "enabled": true,
+      "max_seeds_per_unit": 5,
+      "max_snowball_sources": 10
+    },
+    "grey_literature": false,
+    "structured_extraction": true,
+    "failure_analysis": true
+  },
+  "gates": {
+    "depth_gate": {
+      "required_fulltext": 2,
+      "status": "passed"
+    },
+    "completion_gate": {
+      "requires_high_confidence": true,
+      "status": "passed",
+      "gaps_declared": [
+        "synthetic-sgp-odds-generation",
+        "correlation-collision-detection"
+      ]
+    },
+    "retraction_gate": {
+      "status": "passed"
+    }
+  },
+  "statistics": {
+    "sources_found": 44,
+    "sources_deduplicated": 3,
+    "fulltext_resolved": 42,
+    "abstract_only": 1,
+    "paywalled": 1,
+    "retractions_found": 0,
+    "snowball_added": 6,
+    "failure_studies_found": 6,
+    "risk_mitigation_pairs": 8
+  },
+  "confidence_tracking": {
+    "high_confidence_claims": 12,
+    "low_confidence_claims": 0,
+    "gaps_requiring_research": [
+      "synthetic-sgp-odds-generation",
+      "correlation-collision-detection"
+    ]
+  }
+}
